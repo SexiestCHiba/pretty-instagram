@@ -34,7 +34,6 @@ var loginInsta = async function (user, res) {
 	var loginUser = await client.login();
 	if(loginUser.status === 'ok'){
 		profile = await client.getUserByUsername({username: user});
-		console.log(profile);
 		res.status(200);
 		milieuMessage += '<img class="profile_pic" src="' + profile.profile_pic_url + '"><span class="block_name"><h2>@' + profile.username +  '</h2><h3>'+ profile.full_name + '</h3><p class="biography">' + profile.biography + '</p></span><br style="clear:both;" />';
 		if(profile.is_private != true){
@@ -106,7 +105,7 @@ var loginInstaDebug = async function(user, res){
 
 var displayPicture = async function(profile, photo, milieuMessage){
 	let max = 50;
-	milieuMessage += '<div class="photo">'
+	milieuMessage += '<div class="photo">';
 	if(profile.edge_owner_to_timeline_media.count < max) max = profile.edge_owner_to_timeline_media.count;
 	for(let x = 0; x < max; x++){
 		milieuMessage = milieuMessage + '<div class="ig-post">'; if(x<6){ milieuMessage += '<img src="' + photo.user.edge_owner_to_timeline_media.edges[x].node.thumbnail_src + '"></div>'; }else{milieuMessage += '<img class="lazy" data-src="' + photo.user.edge_owner_to_timeline_media.edges[x].node.thumbnail_src + '"></div>';} 
