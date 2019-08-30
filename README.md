@@ -2,7 +2,7 @@
 
 a node.js web page to display the latest posts of your favorite personalities
 
-![Screenshot](screenshot.png)
+![Screenshot](screenshot.jpg)
 
 Photo credit by [davidderueda](https://www.instagram.com/davidderueda/)
 
