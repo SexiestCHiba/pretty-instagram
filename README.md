@@ -18,4 +18,4 @@ The repositories and all files insides, are available under the MIT licences
 
 ## Contact
 
-You can contact me at [mailto:quentin3157.github@gmail.com](quentin3157.github@gmail.com).
+You can contact me at [quentin3157.github@gmail.com](mailto:quentin3157.github@gmail.com).
