@@ -48,26 +48,26 @@ var loginInsta = async function (user, res) {
 	}else{
 		console.log('erreur 1');
 	}
-}catch(err){
-	console.log('erreur 2');
-	error = true;
-	//console.log(err);
-	if(err.statusCode === 404){
+	}catch(err){
+		console.log('erreur 2');
+		error = true;
+		console.log(err);
+		if(err.statusCode === 404){
 		milieuMessage += 'Utilisateur introuvable';
-	}
-	if(err.error.message){
-		milieuMessage += 'Instagram signale une erreur: ' + err.error.message;
-	}
-	if(err.error && err.error.message === 'checkpoint_required'){
-		const challengeUrl = err.error.checkpoint_url;
-		await client.updateChallenge({challengeUrl, choice: 1});
+		}
+		if(err.error.message){
+			milieuMessage += 'Instagram signale une erreur: ' + err.error.message;
+		}
+		if(err.error && err.error.message === 'checkpoint_required'){
+			const challengeUrl = err.error.checkpoint_url;
+			await client.updateChallenge({challengeUrl, choice: 1});
 		
-		await client.updateChallenge({challengeUrl, securityCode: '301794'}); // <== securityCode - set code from email.
+			await client.updateChallenge({challengeUrl, securityCode: '301794'}); // <== securityCode - set code from email.
+		}
+	}finally{
+		if(error === true) milieuMessage += 'Une erreur est survenue';
+		res.send(message + milieuMessage + finMessage);
 	}
-}finally{
-	if(error === true) milieuMessage += 'Une erreur est survenue';
-	res.send(message + milieuMessage + finMessage);
-}
 }
 
 
@@ -86,7 +86,7 @@ var loginInstaDebug = async function(user, res){
 	}catch(err){
 		console.log('erreur 2');
 		console.log(err);
-		if(profile.statusCode === 404){
+		if(err.statusCode === 404){
 			res.status(400).send(message + 'Utilisateur introuvable' + finMessage);
 			return;
 		}
@@ -109,19 +109,47 @@ var displayPicture = async function(profile, photo, milieuMessage){
 	if(max === 0 ) milieuMessage += 'Aucune image a affiché';
 	for(let x = 0; x < max; x++){
 		milieuMessage = milieuMessage + '<div class="ig-post">';
-		if(photo.user.edge_owner_to_timeline_media.edges[x].node.__typename == 'GraphSidecar'){milieuMessage += '<div class="graphIcon"><i class="material-icons md-light">filter</i></div>';} else{ if(photo.user.edge_owner_to_timeline_media.edges[x].node.__typename === 'GraphVideo'){milieuMessage+= '<div class="graphIcon"><i class="material-icons md-light">videocam</i></div>';}}
-		if(x<6){ milieuMessage += '<a href="#"><img src="' + photo.user.edge_owner_to_timeline_media.edges[x].node.thumbnail_src + '"'; milieuMessage += '>'; }else{milieuMessage += '<img class="lazy" data-src="' + photo.user.edge_owner_to_timeline_media.edges[x].node.thumbnail_src + '"';milieuMessage+= '>';}
+		if(photo.user.edge_owner_to_timeline_media.edges[x].node.__typename == 'GraphSidecar'){
+			milieuMessage += '<div class="graphIcon"><i class="material-icons md-light">filter</i></div>';
+		} else{
+			if(photo.user.edge_owner_to_timeline_media.edges[x].node.__typename === 'GraphVideo'){
+				milieuMessage+= '<div class="graphIcon"><i class="material-icons md-light">videocam</i></div>';
+			}
+		}
+		if(x<6){
+			milieuMessage += '<a href="javascript:showPost(\'' + photo.user.edge_owner_to_timeline_media.edges[x].node.id + '\');"><img src="' + photo.user.edge_owner_to_timeline_media.edges[x].node.thumbnail_src + '"></a>';
+		}else{
+			milieuMessage += '<a href="javascript:showPost(\'' + photo.user.edge_owner_to_timeline_media.edges[x].node.id + '\');"><img class="lazy" data-src="' + photo.user.edge_owner_to_timeline_media.edges[x].node.thumbnail_src + '"></a>';
+		}
 
 		milieuMessage += '</div>';
 	}
-	milieuMessage += '<script type="text/javascript">document.addEventListener("DOMContentLoaded", function() {var lazyloadImages = document.querySelectorAll("img.lazy");var lazyloadThrottleTimeout;lazyload();'+
-	'function lazyload () {if(lazyloadThrottleTimeout) {clearTimeout(lazyloadThrottleTimeout);} '+  
-	'lazyloadThrottleTimeout = setTimeout(function() {var scrollTop = window.pageYOffset;lazyloadImages.forEach(function(img) {if(img.offsetTop < (window.innerHeight + scrollTop)) {img.src = img.dataset.src;img.classList.remove(\'lazy\');}});'+
-	'if(lazyloadImages.length == 0) { document.removeEventListener("scroll", lazyload);window.removeEventListener("resize", lazyload);window.removeEventListener("orientationChange", lazyload);}'+
-		'}, 20);}'+  
-	  'document.addEventListener("scroll", lazyload);window.addEventListener("resize", lazyload);window.addEventListener("orientationChange", lazyload);'+
-	'});'+
-	'</script></div>';
+	milieuMessage += '<script type="text/javascript">window.addEventListener(\'load\', function() {'+
+	'var lazyloadImages = document.querySelectorAll("img.lazy");var lazyloadThrottleTimeout;lazyload();'+
+	'function lazyload () {'+
+		'if(lazyloadThrottleTimeout) {'+
+			'clearTimeout(lazyloadThrottleTimeout);'+
+		'} '+  
+		'lazyloadThrottleTimeout = setTimeout(function() {'+
+			'var scrollTop = window.pageYOffset;lazyloadImages.forEach(function(img) {'+
+				'if(img.offsetTop < (window.innerHeight + scrollTop)) {'+
+					'img.src = img.dataset.src;img.classList.remove(\'lazy\');'+
+				'}});'+
+			'if(lazyloadImages.length == 0) {'+
+				'document.removeEventListener("scroll", lazyload);window.removeEventListener("resize", lazyload);window.removeEventListener("orientationChange", lazyload);'+
+			'}}, 20);}'+  
+	'document.addEventListener("scroll", lazyload);window.addEventListener("resize", lazyload);window.addEventListener("orientationChange", lazyload);});</script>'+
+	'<script type="text/javascript">'+
+	'var showPost = function(id){'+
+		'$.ajax({'+
+		'url: \'window.location.href,\''+
+		'type: \'POST\''+
+		'dataType: \'html\''+
+		'data:'
+		'});'+
+	'}'+
+	'</script>'+
+	'</div>';
 	return milieuMessage;
 }
 
