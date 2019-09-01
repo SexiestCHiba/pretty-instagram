@@ -2,6 +2,7 @@ var express = require('express');
 var favicon = require('serve-favicon');
 require("dotenv").config();
 var app = express();
+var bodyParser = require('body-parser');
 const Instagram = require('instagram-web-api');
 const username = process.env.USERNAME;
 const password = process.env.PASSWORD;
@@ -17,6 +18,7 @@ var message ='<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8" /><titl
 '.photo{z-index:10;display:grid;grid-template-columns: 33% 33% 33%;grid-gap:3px;margin-top:30px;}.ig-post img{width:100%;min-height:50px;height:auto;}.ig-post{grid-column:span 1;grid-row:span 1;}.graphIcon{position:absolute;width:max-content;z-index:15;}'+
 '@media screen and (max-width: 750px) {#main{margin:40px;}.ig-post img{min-height:30px;}}#search-icon{cursor:pointer;} '+
 '</style></head>'+
+'<div id="fullScreen" style="display:none;"><div style="width:90%;height:auto;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);"></div></div>'+
 '<body><div id="nav"><div class="ig-title">Pretty Instagram</div><div class="ig-search"><input id="input-search" type="text" placaholder="Search" value=""><i class="material-icons" id="search-icon">keyboard_arrow_right</i></div><div class="ig-setting"><i class="material-icons">more_vert</i></div></div>'+
 '<script type="text/javascript">document.getElementById(\'search-icon\').addEventListener("click", function(){window.location.href= document.getElementById(\'input-search\').value;});</script>'+
 '<div id="main">';
@@ -117,13 +119,14 @@ var displayPicture = async function(profile, photo, milieuMessage){
 			}
 		}
 		if(x<6){
-			milieuMessage += '<a href="javascript:showPost(\'' + photo.user.edge_owner_to_timeline_media.edges[x].node.id + '\');"><img src="' + photo.user.edge_owner_to_timeline_media.edges[x].node.thumbnail_src + '"></a>';
+			milieuMessage += '<a href="javascript:showPost(\'' + photo.user.edge_owner_to_timeline_media.edges[x].node.shortcode + '\');"><img src="' + photo.user.edge_owner_to_timeline_media.edges[x].node.thumbnail_src + '"></a>';
 		}else{
-			milieuMessage += '<a href="javascript:showPost(\'' + photo.user.edge_owner_to_timeline_media.edges[x].node.id + '\');"><img class="lazy" data-src="' + photo.user.edge_owner_to_timeline_media.edges[x].node.thumbnail_src + '"></a>';
+			milieuMessage += '<a href="javascript:showPost(\'' + photo.user.edge_owner_to_timeline_media.edges[x].node.shortcode + '\');"><img class="lazy" data-src="' + photo.user.edge_owner_to_timeline_media.edges[x].node.thumbnail_src + '"></a>';
 		}
 
 		milieuMessage += '</div>';
 	}
+
 	milieuMessage += '<script type="text/javascript">window.addEventListener(\'load\', function() {'+
 	'var lazyloadImages = document.querySelectorAll("img.lazy");var lazyloadThrottleTimeout;lazyload();'+
 	'function lazyload () {'+
@@ -141,19 +144,49 @@ var displayPicture = async function(profile, photo, milieuMessage){
 	'document.addEventListener("scroll", lazyload);window.addEventListener("resize", lazyload);window.addEventListener("orientationChange", lazyload);});</script>'+
 	'<script type="text/javascript">'+
 	'var showPost = function(id){'+
+	'console.log(id);'+
 		'$.ajax({'+
-		'url: \'window.location.href,\''+
-		'type: \'POST\''+
-		'dataType: \'html\''+
-		'data:'
+			'url: \'window.location.href\','+
+			'type: \'POST\','+
+			'dataType: \'html\','+
+			'data:\'idPost=\' + id,'+
+			'success: function(html, status){'+
+				'displayFullScreen();'+
+			'},'+
+			'error: function(result, status, error){'+
+				'displayFullScreen();'+
+				'console.log(status + error);'+
+			'},'+
 		'});'+
-	'}'+
+	'};'+
+	'var displayFullScreen = function(){'+
+		'let position = document.body.scrollTop;'+
+		'document.body.setAttribute(\'style\', \'overflow:hidden;\');'+
+		'document.getElementById(\'fullScreen\').setAttribute(\'style\', \'display:block;position:absolute;top:\' + position + \'px;left:0;width:100%;height:100%;background-color:rgba(0, 0, 0, 0.3);z-index:200;\');'+
+	'};'+
 	'</script>'+
 	'</div>';
 	return milieuMessage;
 }
 
+var postsInfo = async function(idPost){
+	try{
+		var client = new Instagram({username, password});
+		var loginUser = await client.login();
+		if(loginUser.status === 'ok'){
+			const media = await client.getMediaByShortcode({shortcode: idPost});
+			console.log(media);
+		}
+	}catch(err){
+		console.log('error 3');
+		console.log(err);
+	}
+	
+}
+
 app.use(express.static(__dirname + '/public'))
+.use(bodyParser.json())
+.use(bodyParser.urlencoded({ extended: true}))
 .use(favicon(__dirname + '/public/logo.png'))
 .get('/', function(req, res){
 	res.setHeader('Cache-Control', 'no-store, no-cache, public, no-transform');
@@ -164,6 +197,11 @@ app.use(express.static(__dirname + '/public'))
 .get('/:nick', function(req, res){
 	res.setHeader('Cache-Control', 'no-store, no-cache, public, no-transform');
 	loginInsta(req.params.nick, res);
+})
+.post('/:nick', function(req, res){
+	res.setHeader('Cache-Control', 'no-store, no-chache, public, no-transform');
+	postsInfo(req.body.idPost);
+	res.status(404).send('rien');
 })
 .use(function(req, res, next){
 	res.status(404);
