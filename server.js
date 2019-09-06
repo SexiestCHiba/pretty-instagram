@@ -13,12 +13,14 @@ var message ='<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8" /><titl
 '#nav{z-index:100;position:fixed;top:0;left:0;width:100%;height:48px;line-height: 48px;background-color: white;box-shadow: 0px 2px 1px rgba(0, 0, 0, 0.1);font-family: \'Courier New\', Courier, monospace;}'+
 '#nav .ig-title{position:absolute;margin-left: 20px;font-size:20px;font-size:1.5rem;}#nav .ig-search{position:absolute;left:50%;transform: translateX(-50%);width:max-content;height:48px;}#nav .ig-setting{position:absolute;right:0;margin-right: 20px;top:50%;transform: translateY(-50%);}'+
 '.material-icons{position: relative;top:7px;}'+
-'#main{margin:100px;}'+
+'#main{margin:100px;}a{text-decoration:none;color:black;}'+
 '.profile_pic{border-radius:50%;float:left;width:150px;height:150px;}.block_name{float:left;margin:0 20px;color: #262626;}.material-icons.md-light{color:rgba(255, 255, 255, 1);}'+ 
 '.photo{z-index:10;display:grid;grid-template-columns: 33% 33% 33%;grid-gap:3px;margin-top:30px;}.ig-post img{width:100%;min-height:50px;height:auto;}.ig-post{grid-column:span 1;grid-row:span 1;}.graphIcon{position:absolute;width:max-content;z-index:15;}'+
+'#fullScreen{position:absolute;left:0;width:100%;height:100%;background-color:rgba(0, 0, 0, 0.6);z-index:200;}'+
+'.ig-post-link{position:absolute;top:0px;left:0px;z-index:201;margin-top:10px;font-size:1.2rem;}.ig-post-link a{color:white;}'+
 '@media screen and (max-width: 750px) {#main{margin:40px;}.ig-post img{min-height:30px;}}#search-icon{cursor:pointer;} '+
 '</style></head>'+
-'<div id="fullScreen" style="display:none;"><div style="width:90%;height:auto;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);"></div></div>'+
+'<div id="fullScreen" style="display:none;"><div class="ig-post-link"><a href="javascript:closeFulllScreen();"><span><i class="material-icons">close</i>Fermer</span></a><a id="ig-link-to-post" target="_blank" href=""><span style="margin-left:10px;"><i class="material-icons">exit_to_app</i>Voir sur Instagram</span></a></div><div id="ig-post-content" style="width:max-content;max-width:50%;height:max-content;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);"></div></div>'+
 '<body><div id="nav"><div class="ig-title">Pretty Instagram</div><div class="ig-search"><input id="input-search" type="text" placaholder="Search" value=""><i class="material-icons" id="search-icon">keyboard_arrow_right</i></div><div class="ig-setting"><i class="material-icons">more_vert</i></div></div>'+
 '<script type="text/javascript">document.getElementById(\'search-icon\').addEventListener("click", function(){window.location.href= document.getElementById(\'input-search\').value;});</script>'+
 '<div id="main">';
@@ -145,41 +147,76 @@ var displayPicture = async function(profile, photo, milieuMessage){
 	'<script type="text/javascript">'+
 	'var showPost = function(id){'+
 	'console.log(id);'+
+	'displayFullScreen(id);'+
 		'$.ajax({'+
 			'url: \'window.location.href\','+
 			'type: \'POST\','+
 			'dataType: \'html\','+
 			'data:\'idPost=\' + id,'+
 			'success: function(html, status){'+
-				'displayFullScreen();'+
+			'let obj = JSON.parse(html);'+
+			'console.log(html);'+
+			'if(obj.type === \'GraphImage\'){'+
+				'document.getElementById(\'ig-post-content\').innerHTML = \'<img style="width:100%;height:auto;" src="\' + obj.photo + \'">\';'+
+			'}else{'+
+				'if(obj.type === \'GraphVideo\'){'+
+					'console.log(\'2\');document.getElementById(\'ig-post-content\').innerHTML = \'<video controls autoplay><source src="\' + obj.video + \'" type="video/mp4"></video>\';'+
+				'}else{'+
+					'console.log(\'3\');'+
+				'}'+
+			'}'+
 			'},'+
 			'error: function(result, status, error){'+
-				'displayFullScreen();'+
-				'console.log(status + error);'+
+				'document.getElementById(\'ig-post-content\').innerHTML = \'Une erreur est survenue: \' + status + \' \' + error;'+
 			'},'+
 		'});'+
 	'};'+
-	'var displayFullScreen = function(){'+
-		'let position = document.body.scrollTop;'+
+	'var displayFullScreen = function(id){'+
 		'document.body.setAttribute(\'style\', \'overflow:hidden;\');'+
-		'document.getElementById(\'fullScreen\').setAttribute(\'style\', \'display:block;position:absolute;top:\' + position + \'px;left:0;width:100%;height:100%;background-color:rgba(0, 0, 0, 0.3);z-index:200;\');'+
-	'};'+
+		'const position = window.scrollY;'+
+		'document.getElementById(\'fullScreen\').setAttribute(\'style\', \'display:block;top:\' + position + \'px;\');'+
+		'document.getElementById(\'ig-link-to-post\').setAttribute(\'href\', \'https://instagram.com/p/\' + id + \'/\');'+
+		'};'+
+	'var closeFulllScreen = function(){'+
+	'document.body.setAttribute(\'style\', \'overflow:auto;\');'+
+	'document.getElementById(\'fullScreen\').setAttribute(\'style\', \'display:none;\');'+
+	'document.getElementById(\'ig-link-to-post\').setAttribute(\'href\', \'\');'+
+	'}'+
 	'</script>'+
 	'</div>';
 	return milieuMessage;
 }
 
-var postsInfo = async function(idPost){
+var postsInfo = async function(idPost, res){
 	try{
 		var client = new Instagram({username, password});
 		var loginUser = await client.login();
 		if(loginUser.status === 'ok'){
 			const media = await client.getMediaByShortcode({shortcode: idPost});
 			console.log(media);
+			let response = {
+				'type': media.__typename
+			};
+			if(media.__typename !== 'GraphSidecar' && media.__typename !== 'GraphVideo'){
+				response.photo = media.display_url;
+			}else{
+				if(media.__typename === 'GraphVideo'){
+					response.video = media.video_url;
+				}else{
+
+				}
+			}
+			res.status(200).send(response);
 		}
 	}catch(err){
 		console.log('error 3');
-		console.log(err);
+		if(err.statusCode === 404){
+			res.status(404).send('<span style="color:white;">Post introuvable</span>');
+			return;
+		}else{
+			res.status(404).send('Une erreur est survenue');
+			console.log(err);
+		}
 	}
 	
 }
@@ -200,8 +237,7 @@ app.use(express.static(__dirname + '/public'))
 })
 .post('/:nick', function(req, res){
 	res.setHeader('Cache-Control', 'no-store, no-chache, public, no-transform');
-	postsInfo(req.body.idPost);
-	res.status(404).send('rien');
+	postsInfo(req.body.idPost, res);
 })
 .use(function(req, res, next){
 	res.status(404);
