@@ -2,6 +2,7 @@ var express = require('express');
 var favicon = require('serve-favicon');
 require("dotenv").config();
 var app = express();
+var bodyParser = require('body-parser');
 const Instagram = require('instagram-web-api');
 const username = process.env.USERNAME;
 const password = process.env.PASSWORD;
@@ -12,13 +13,17 @@ var message ='<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8" /><titl
 '#nav{z-index:100;position:fixed;top:0;left:0;width:100%;height:48px;line-height: 48px;background-color: white;box-shadow: 0px 2px 1px rgba(0, 0, 0, 0.1);font-family: \'Courier New\', Courier, monospace;}'+
 '#nav .ig-title{position:absolute;margin-left: 20px;font-size:20px;font-size:1.5rem;}#nav .ig-search{position:absolute;left:50%;transform: translateX(-50%);width:max-content;height:48px;}#nav .ig-setting{position:absolute;right:0;margin-right: 20px;top:50%;transform: translateY(-50%);}'+
 '.material-icons{position: relative;top:7px;}'+
-'#main{margin:100px;}'+
+'#main{margin:100px;}a{text-decoration:none;color:black;}'+
 '.profile_pic{border-radius:50%;float:left;width:150px;height:150px;}.block_name{float:left;margin:0 20px;color: #262626;}.material-icons.md-light{color:rgba(255, 255, 255, 1);}'+ 
 '.photo{z-index:10;display:grid;grid-template-columns: 33% 33% 33%;grid-gap:3px;margin-top:30px;}.ig-post img{width:100%;min-height:50px;height:auto;}.ig-post{grid-column:span 1;grid-row:span 1;}.graphIcon{position:absolute;width:max-content;z-index:15;}'+
+'#fullScreen{position:absolute;left:0;width:100%;height:100%;background-color:rgba(0, 0, 0, 0.85);z-index:200;}'+
+'.ig-post-link{position:absolute;top:0px;left:0px;z-index:201;margin-top:10px;font-size:1.2rem;}.ig-post-link a{color:white;}'+
 '@media screen and (max-width: 750px) {#main{margin:40px;}.ig-post img{min-height:30px;}}#search-icon{cursor:pointer;} '+
 '</style></head>'+
+'<div id="fullScreen" style="display:none;"><div class="ig-post-link"><a href="javascript:closeFulllScreen();"><span><i class="material-icons">close</i>Fermer</span></a><a id="ig-link-to-post" target="_blank" href=""><span style="margin-left:10px;"><i class="material-icons">exit_to_app</i>Voir sur Instagram</span></a></div>'+
+'<div id="ig-post-content" style="width:max-content;max-width:50%;height:max-content;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);"></div></div>'+
 '<body><div id="nav"><div class="ig-title">Pretty Instagram</div><div class="ig-search"><input id="input-search" type="text" placaholder="Search" value=""><i class="material-icons" id="search-icon">keyboard_arrow_right</i></div><div class="ig-setting"><i class="material-icons">more_vert</i></div></div>'+
-'<script type="text/javascript">document.getElementById(\'search-icon\').addEventListener("click", function(){window.location.href= document.getElementById(\'input-search\').value;});</script>'+
+'<script type="text/javascript">document.getElementById(\'search-icon\').addEventListener("click", function(){window.location.assign(\'/\' + document.getElementById(\'input-search\').value);});</script>'+
 '<div id="main">';
 
 
@@ -48,26 +53,26 @@ var loginInsta = async function (user, res) {
 	}else{
 		console.log('erreur 1');
 	}
-}catch(err){
-	console.log('erreur 2');
-	error = true;
-	//console.log(err);
-	if(err.statusCode === 404){
+	}catch(err){
+		console.log('erreur 2');
+		error = true;
+		console.log(err);
+		if(err.statusCode === 404){
 		milieuMessage += 'Utilisateur introuvable';
-	}
-	if(err.error.message){
-		milieuMessage += 'Instagram signale une erreur: ' + err.error.message;
-	}
-	if(err.error && err.error.message === 'checkpoint_required'){
-		const challengeUrl = err.error.checkpoint_url;
-		await client.updateChallenge({challengeUrl, choice: 1});
+		}
+		if(err.error.message){
+			milieuMessage += 'Instagram signale une erreur: ' + err.error.message;
+		}
+		if(err.error && err.error.message === 'checkpoint_required'){
+			const challengeUrl = err.error.checkpoint_url;
+			await client.updateChallenge({challengeUrl, choice: 1});
 		
-		await client.updateChallenge({challengeUrl, securityCode: '301794'}); // <== securityCode - set code from email.
+			await client.updateChallenge({challengeUrl, securityCode: '301794'}); // <== securityCode - set code from email.
+		}
+	}finally{
+		if(error === true) milieuMessage += 'Une erreur est survenue';
+		res.send(message + milieuMessage + finMessage);
 	}
-}finally{
-	if(error === true) milieuMessage += 'Une erreur est survenue';
-	res.send(message + milieuMessage + finMessage);
-}
 }
 
 
@@ -86,7 +91,7 @@ var loginInstaDebug = async function(user, res){
 	}catch(err){
 		console.log('erreur 2');
 		console.log(err);
-		if(profile.statusCode === 404){
+		if(err.statusCode === 404){
 			res.status(400).send(message + 'Utilisateur introuvable' + finMessage);
 			return;
 		}
@@ -109,23 +114,151 @@ var displayPicture = async function(profile, photo, milieuMessage){
 	if(max === 0 ) milieuMessage += 'Aucune image a affiché';
 	for(let x = 0; x < max; x++){
 		milieuMessage = milieuMessage + '<div class="ig-post">';
-		if(photo.user.edge_owner_to_timeline_media.edges[x].node.__typename == 'GraphSidecar'){milieuMessage += '<div class="graphIcon"><i class="material-icons md-light">filter</i></div>';} else{ if(photo.user.edge_owner_to_timeline_media.edges[x].node.__typename === 'GraphVideo'){milieuMessage+= '<div class="graphIcon"><i class="material-icons md-light">videocam</i></div>';}}
-		if(x<6){ milieuMessage += '<a href="#"><img src="' + photo.user.edge_owner_to_timeline_media.edges[x].node.thumbnail_src + '"'; milieuMessage += '>'; }else{milieuMessage += '<img class="lazy" data-src="' + photo.user.edge_owner_to_timeline_media.edges[x].node.thumbnail_src + '"';milieuMessage+= '>';}
+		if(photo.user.edge_owner_to_timeline_media.edges[x].node.__typename == 'GraphSidecar'){
+			milieuMessage += '<div class="graphIcon"><i class="material-icons md-light">filter</i></div>';
+		} else{
+			if(photo.user.edge_owner_to_timeline_media.edges[x].node.__typename === 'GraphVideo'){
+				milieuMessage+= '<div class="graphIcon"><i class="material-icons md-light">videocam</i></div>';
+			}
+		}
+		if(x<6){
+			milieuMessage += '<a href="javascript:showPost(\'' + photo.user.edge_owner_to_timeline_media.edges[x].node.shortcode + '\');"><img src="' + photo.user.edge_owner_to_timeline_media.edges[x].node.thumbnail_src + '"></a>';
+		}else{
+			milieuMessage += '<a href="javascript:showPost(\'' + photo.user.edge_owner_to_timeline_media.edges[x].node.shortcode + '\');"><img class="lazy" data-src="' + photo.user.edge_owner_to_timeline_media.edges[x].node.thumbnail_src + '"></a>';
+		}
 
 		milieuMessage += '</div>';
 	}
-	milieuMessage += '<script type="text/javascript">document.addEventListener("DOMContentLoaded", function() {var lazyloadImages = document.querySelectorAll("img.lazy");var lazyloadThrottleTimeout;lazyload();'+
-	'function lazyload () {if(lazyloadThrottleTimeout) {clearTimeout(lazyloadThrottleTimeout);} '+  
-	'lazyloadThrottleTimeout = setTimeout(function() {var scrollTop = window.pageYOffset;lazyloadImages.forEach(function(img) {if(img.offsetTop < (window.innerHeight + scrollTop)) {img.src = img.dataset.src;img.classList.remove(\'lazy\');}});'+
-	'if(lazyloadImages.length == 0) { document.removeEventListener("scroll", lazyload);window.removeEventListener("resize", lazyload);window.removeEventListener("orientationChange", lazyload);}'+
-		'}, 20);}'+  
-	  'document.addEventListener("scroll", lazyload);window.addEventListener("resize", lazyload);window.addEventListener("orientationChange", lazyload);'+
-	'});'+
-	'</script></div>';
+
+	milieuMessage += '<script type="text/javascript">window.addEventListener(\'load\', function() {'+
+	'var lazyloadImages = document.querySelectorAll("img.lazy");var lazyloadThrottleTimeout;lazyload();'+
+	'function lazyload () {'+
+		'if(lazyloadThrottleTimeout) {'+
+			'clearTimeout(lazyloadThrottleTimeout);'+
+		'} '+  
+		'lazyloadThrottleTimeout = setTimeout(function() {'+
+			'var scrollTop = window.pageYOffset;lazyloadImages.forEach(function(img) {'+
+				'if(img.offsetTop < (window.innerHeight + scrollTop)) {'+
+					'img.src = img.dataset.src;img.classList.remove(\'lazy\');'+
+				'}});'+
+			'if(lazyloadImages.length == 0) {'+
+				'document.removeEventListener("scroll", lazyload);window.removeEventListener("resize", lazyload);window.removeEventListener("orientationChange", lazyload);'+
+			'}}, 20);}'+  
+	'document.addEventListener("scroll", lazyload);window.addEventListener("resize", lazyload);window.addEventListener("orientationChange", lazyload);});</script>'+
+	'<script type="text/javascript">'+
+	'var currentCard;'+
+	'var obj;'+
+	'var showPost = function(id){'+
+	'displayFullScreen(id);'+
+		'$.ajax({'+
+			'url: \'window.location.href\','+
+			'type: \'POST\','+
+			'dataType: \'html\','+
+			'data:\'idPost=\' + id,'+
+			'success: function(html, status){'+
+			'obj = JSON.parse(html);'+
+			'if(obj.type === \'GraphImage\'){'+
+				'document.getElementById(\'ig-post-content\').innerHTML = \'<img style="width:100%;height:auto;" src="\' + obj.photo + \'">\';'+
+			'}else{'+
+				'if(obj.type === \'GraphVideo\'){'+
+					'document.getElementById(\'ig-post-content\').innerHTML = \'<video controls autoplay><source src="\' + obj.video + \'" type="video/mp4"></video>\';'+
+				'}else{'+
+				'currentCard = 0;'+
+				'if(obj[0].type === \'GraphImage\'){'+
+					'document.getElementById(\'ig-post-content\').innerHTML = \'<img style="width:100%;height:auto;" src="\' + obj[0].photo + \'"><div id="ig-post-arrow-right" onclick="changePic(currentCard + 1)" style="cursor:pointer;position:absolute;top:50%; right:0;transform: translateY(-50%);"><i class="material-icons md-light">keyboard_arrow_right</i></div>\';'+
+					'}else{'+
+					'document.getElementById(\'ig-post-content\').innerHTML = \'<video controls autoplay><source src="\' + obj[0].video + \'" type="video/mp4"></video><div id="ig-post-arrow-right" onclick="changePic(currentCard + 1)" style="cursor:pointer;position:absolute;top:50%; right:0;transform: translateY(-50%);"><i class="material-icons md-light">keyboard_arrow_right</i></div>\';'+
+					'}'+
+				'}'+
+			'}'+
+			'},'+
+			'error: function(result, status, error){'+
+				'document.getElementById(\'ig-post-content\').innerHTML = \'Une erreur est survenue: \' + status + \' \' + error;'+
+			'},'+
+		'});'+
+	'};'+
+	'var displayFullScreen = function(id){'+
+		'document.body.setAttribute(\'style\', \'overflow:hidden;\');'+
+		'const position = window.scrollY;'+
+		'document.getElementById(\'fullScreen\').setAttribute(\'style\', \'display:block;top:\' + position + \'px;\');'+
+		'document.getElementById(\'ig-link-to-post\').setAttribute(\'href\', \'https://instagram.com/p/\' + id + \'/\');'+
+	'};'+
+	'var closeFulllScreen = function(){'+
+		'document.body.setAttribute(\'style\', \'overflow:auto;\');'+
+		'document.getElementById(\'fullScreen\').setAttribute(\'style\', \'display:none;\');'+
+		'document.getElementById(\'ig-link-to-post\').setAttribute(\'href\', \'\');'+
+		'document.getElementById(\'ig-post-content\').innerHTML = \'\';'+
+	'};'+
+	'var changePic = function(num){'+
+		'if(num <= obj.count){'+
+		'let messageToSend = \'\';'+
+		'if(num !== 0){ messageToSend += \'<div id="ig-post-arrow-left" onclick="changePic(currentCard - 1)" style="cursor:pointer;position:absolute;top:50%; left:0;transform: translateY(-50%);"><i class="material-icons md-light">keyboard_arrow_left</i></div>\';}'+
+			'if(obj[num].type === \'GraphImage\'){'+
+				'messageToSend += \'<img style="width:100%;height:auto;" src="\' + obj[num].photo + \'">\';'+
+			'}else{'+
+				'messageToSend += \'<video controls autoplay><source src="\' + obj[num].video + \'" type="video/mp4"></video>\';'+
+			'}'+
+			'if(num != obj.count){ messageToSend += \'<div id="ig-post-arrow-right" onclick="changePic(currentCard + 1)" style="cursor:pointer;position:absolute;top:50%; right:0;transform: translateY(-50%);"><i class="material-icons md-light">keyboard_arrow_right</i></div>\';}'+
+			'document.getElementById(\'ig-post-content\').innerHTML = messageToSend;'+
+			'currentCard = num;'+
+		'}else{return;}'+
+	'};'+
+	'</script>'+
+	'</div>';
 	return milieuMessage;
 }
 
+var postsInfo = async function(idPost, res){
+	try{
+		var client = new Instagram({username, password});
+		var loginUser = await client.login();
+		if(loginUser.status === 'ok'){
+			const media = await client.getMediaByShortcode({shortcode: idPost});
+			let response = {
+				'type': media.__typename
+			};
+			if(media.__typename !== 'GraphSidecar' && media.__typename !== 'GraphVideo'){
+				response.photo = media.display_url;
+			}else{
+				if(media.__typename === 'GraphVideo'){
+					response.video = media.video_url;
+				}else{
+					let i;
+					for(i in media.edge_sidecar_to_children.edges){
+						if(media.edge_sidecar_to_children.edges[i].node.__typename === 'GraphImage'){
+							response[i] = {
+								'photo': media.edge_sidecar_to_children.edges[i].node.display_url,
+								'type': 'GraphImage'
+							};
+						}else{
+							//GraphVideo
+							response[i] = {
+								'video': media.edge_sidecar_to_children.edges[i].node.video_url,
+								'type': 'GraphVideo'
+							};
+						}
+					}
+					response.count = i;
+				}
+			}
+			res.status(200).send(response);
+		}
+	}catch(err){
+		console.log('error 3');
+		if(err.statusCode === 404){
+			res.status(404).send('<span style="color:white;">Post introuvable</span>');
+			return;
+		}else{
+			res.status(404).send('Une erreur est survenue');
+			console.log(err);
+		}
+	}
+	
+}
+
 app.use(express.static(__dirname + '/public'))
+.use(bodyParser.json())
+.use(bodyParser.urlencoded({ extended: true}))
 .use(favicon(__dirname + '/public/logo.png'))
 .get('/', function(req, res){
 	res.setHeader('Cache-Control', 'no-store, no-cache, public, no-transform');
@@ -136,6 +269,10 @@ app.use(express.static(__dirname + '/public'))
 .get('/:nick', function(req, res){
 	res.setHeader('Cache-Control', 'no-store, no-cache, public, no-transform');
 	loginInsta(req.params.nick, res);
+})
+.post('/:nick', function(req, res){
+	res.setHeader('Cache-Control', 'no-store, no-chache, public, no-transform');
+	postsInfo(req.body.idPost, res);
 })
 .use(function(req, res, next){
 	res.status(404);
