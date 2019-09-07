@@ -11,10 +11,10 @@ Photo credit by [davidderueda](https://www.instagram.com/davidderueda/)
 
 * Admire your friends' instagram posts without any disturbing interactions (likes, comments, etc.) to stay focused on the essential.
 * *Lazy Loader* - all posts you don't see on your screen will never load on your device.
+* See posts in fullscreen.
 
 ### Future features
 
-* See posts in fullscreen.
 * possibility to see more than 50 posts (thank to ajax).
 
 ## Dependencies
@@ -31,8 +31,6 @@ async getUserIdPhotos({ id, first = 12, after = '' } = {}) {
 // by
 async getUserIdPhotos({ id, first = 50, after = '' } = {}) {
 ```
-
-*body-parser will be use in futures update*
 
 ## Licences
 
