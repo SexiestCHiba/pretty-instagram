@@ -75,38 +75,6 @@ var loginInsta = async function (user, res) {
 	}
 }
 
-
-var loginInstaDebug = async function(user, res){
-	let profile;
-	let photo;
-	let milieuMessage = '';
-	try{
-		var client = new Instagram({username, password});
-		var loginUser = await client.login();
-		if(loginUser.status === 'ok'){
-			profile = await client.getUserByUsername({username: user});
-			photo = await client.getPhotosByUsername({username: user, first: 50, after: ''});
-			res.status(200).send(photo);
-		}
-	}catch(err){
-		console.log('erreur 2');
-		console.log(err);
-		if(err.statusCode === 404){
-			res.status(400).send(message + 'Utilisateur introuvable' + finMessage);
-			return;
-		}
-		if(err.error.message){
-			milieuMessage = 'Instagram signale une erreur: ' + err.error.message;
-		}
-		if(err.error && err.error.message === 'checkpoint_required'){
-			const challengeUrl = err.error.checkpoint_url;
-			await client.updateChallenge({challengeUrl, choice: 1});
-		
-			await client.updateChallenge({challengeUrl, securityCode: '301794'}); // <== securityCode - set code from email.
-		}
-	}
-}
-
 var displayPicture = async function(profile, photo, milieuMessage){
 	let max = 50;
 	milieuMessage += '<div class="photo">';
