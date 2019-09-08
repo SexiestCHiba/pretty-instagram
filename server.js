@@ -45,7 +45,7 @@ var loginInsta = async function (user, res) {
 		res.status(200);
 		milieuMessage += '<img class="profile_pic" src="' + profile.profile_pic_url + '"><span class="block_name"><h2>@' + profile.username +  '</h2><h3>'+ profile.full_name + '</h3><p class="biography">' + profile.biography + '</p></span><br style="clear:both;" />';
 		if(profile.is_private != true){
-			photo = await client.getPhotosByUsername({username: user}, 50, '');
+			photo = await client.getPhotosByUsername({username: user, first: 48, after:''});
 			milieuMessage = await displayPicture(profile, photo, milieuMessage);
 		}else{
 			milieuMessage += 'profil privé';
@@ -76,11 +76,12 @@ var loginInsta = async function (user, res) {
 }
 
 var displayPicture = async function(profile, photo, milieuMessage){
-	let max = 50;
+	let max = 48;
+	let x;
 	milieuMessage += '<div class="photo">';
 	if(profile.edge_owner_to_timeline_media.count < max) max = profile.edge_owner_to_timeline_media.count;
 	if(max === 0 ) milieuMessage += 'Aucune image a affiché';
-	for(let x = 0; x < max; x++){
+	for(x = 0; x < max; x++){
 		milieuMessage = milieuMessage + '<div class="ig-post">';
 		if(photo.user.edge_owner_to_timeline_media.edges[x].node.__typename == 'GraphSidecar'){
 			milieuMessage += '<div class="graphIcon"><i class="material-icons md-light">filter</i></div>';
