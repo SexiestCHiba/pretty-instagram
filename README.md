@@ -13,10 +13,6 @@ Photo credit by [davidderueda](https://www.instagram.com/davidderueda/)
 * *Lazy Loader* - all posts you don't see on your screen will never load on your device.
 * See posts in fullscreen.
 
-### Future features
-
-* possibility to see more than 50 posts (thank to ajax).
-
 ## Dependencies
 
 `npm i express dotenv serve-favicon body-parser instagram-web-api` to install all dependencies.
