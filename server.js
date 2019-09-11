@@ -107,7 +107,6 @@ var finMessage= '<script type="text/javascript">var lazyloadImages;'+
 '</script>'+
 '<script type="text/javascript">'+
 'function loadMorePost(lastPostId){'+
-'console.log(lastPostId);'+
 	'$.ajax({'+
 		'url: window.location.href,'+
 		'type: \'POST\','+
@@ -115,6 +114,7 @@ var finMessage= '<script type="text/javascript">var lazyloadImages;'+
 		'data: \'lastPostId=\' + lastPostId,'+
 		'success: function(html, status){'+
 			'document.getElementById(\'posts\').innerHTML = document.getElementById(\'posts\').innerHTML + html;'+
+			'document.getElementById(\'lazyLoadDiv\').innerHTML = \'Cliquez ici pour charger plus de posts\';'+
 			'lazyloadImages = document.querySelectorAll("img.lazy");'+
 		'},'+
 		'error: function(result, status, error){'+
@@ -125,7 +125,8 @@ var finMessage= '<script type="text/javascript">var lazyloadImages;'+
 '};'+
 	'var lazyloadDiv = document.getElementById(\'lazyLoadDiv\');'+
 	'function lazyloadPosts(){'+
-	'let elements =document.querySelectorAll("#last");'+
+	'document.getElementById(\'lazyLoadDiv\').innerHTML = \'<i class="material-icons rotation">cached</i>\';'+
+	'let elements = document.querySelectorAll("#last");'+
 	'loadMorePost(elements[elements.length-1].innerHTML);'+
 	'}'+
 	'document.getElementById(\'lazyLoadDiv\').addEventListener("click", lazyloadPosts);'+
@@ -215,7 +216,7 @@ var displayPicture = async function(photo, milieuMessage, firstLoad = true){
 	if(firstLoad) milieuMessage += '</div>';
 	if(firstLoad){
 		if(photo.user.edge_owner_to_timeline_media.page_info.has_next_page === true){
-			milieuMessage += '<div id="lazyLoadDiv">Cliquez ici pour charger plus de posts</div>';
+			milieuMessage += '<div style="text-align:center;"><div id="lazyLoadDiv">Cliquez ici pour charger plus de posts</div></div>';
 		}
 	}
 	milieuMessage += '</div>';
@@ -290,8 +291,12 @@ var morePost = async function(idLastPost, res, user = 'instagram'){
 		if(err.statusCode === 404){
 			res.status(404).send('Page introuvable');
 		}else{
-			res.status(500).send('Une erreur est survenue');
-			console.log(err);
+			if(err.statusCode === 400){
+				res.status(400).send('Code de pagination invalide')
+			}else{
+				res.status(500).send('Une erreur est survenue');
+				console.log(err);
+			}
 		}
 	}
 }
