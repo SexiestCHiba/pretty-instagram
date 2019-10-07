@@ -22,7 +22,7 @@ var message ='<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8" /><titl
 '.ig-post-link{position:absolute;top:0px;left:0px;z-index:201;margin-top:10px;font-size:1.2rem;}.ig-post-link a{color:white;}'+
 '@media screen and (max-width: 750px) {#main{margin:40px;}.ig-post img{min-height:30px;}}#search-icon{cursor:pointer;}#last{display:none;} '+
 '</style></head><body>'+
-'<div id="fullScreen" style="display:none;"><div class="ig-post-link"><a href="javascript:closeFulllScreen();"><span><i class="material-icons">close</i>Fermer</span></a><a id="ig-link-to-post" target="_blank" href=""><span style="margin-left:10px;"><i class="material-icons">exit_to_app</i>Voir sur Instagram</span></a></div>'+
+'<div id="fullScreen" style="display:none;"><div class="ig-post-link"><a href="javascript:closeFulllScreen();"><span><i class="material-icons">close</i>Close</span></a><a id="ig-link-to-post" target="_blank" href=""><span style="margin-left:10px;"><i class="material-icons">exit_to_app</i>See on Instagram</span></a></div>'+
 '<div id="ig-post-content" style="color:white;width:max-content;max-width:50%;height:max-content;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);"><i class="material-icons rotation">cached</i></div></div>'+
 '<div id="nav"><div class="ig-title">Pretty Instagram</div><div class="ig-search"><input id="input-search" type="text" placaholder="Search" value=""><i class="material-icons" id="search-icon">keyboard_arrow_right</i></div><div id="ig-setting"><i class="material-icons">more_vert</i></div></div>'+
 '<script type="text/javascript">'+
@@ -122,7 +122,7 @@ var finMessage= '<script type="text/javascript">var lazyloadImages;'+
 		'data: \'lastPostId=\' + lastPostId,'+
 		'success: function(html, status){'+
 			'document.getElementById(\'posts\').innerHTML = document.getElementById(\'posts\').innerHTML + html;'+
-			'document.getElementById(\'lazyLoadDiv\').innerHTML = \'Cliquez ici pour charger plus de posts\';'+
+			'document.getElementById(\'lazyLoadDiv\').innerHTML = \'click here to load more posts\';'+
 			'lazyloadImages = document.querySelectorAll("img.lazy");'+
 		'},'+
 		'error: function(result, status, error){'+
@@ -224,7 +224,7 @@ var displayPicture = async function(photo, milieuMessage, firstLoad = true){
 	if(firstLoad) milieuMessage += '</div>';
 	if(firstLoad){
 		if(photo.user.edge_owner_to_timeline_media.page_info.has_next_page === true){
-			milieuMessage += '<div style="text-align:center;"><div id="lazyLoadDiv">Cliquez ici pour charger plus de posts</div></div>';
+			milieuMessage += '<div style="text-align:center;"><div id="lazyLoadDiv">click here to load more posts</div></div>';
 		}
 	}
 	milieuMessage += '</div>';
