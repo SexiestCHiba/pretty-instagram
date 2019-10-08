@@ -28,7 +28,7 @@ var message ='<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8" /><titl
 '<script type="text/javascript">'+
 'var displayAbout = function(){'+
 	'displayFullScreen();'+
-	'document.getElementById(\'ig-post-content\').innerHTML = \'<h3>Welcome</h3><p>I\\\'m Quentin, and I\\\'m the Developper of Pretty-Instagram. I\\\'m currently in First year of Computer Sciences study (L1 info for baguette speaker) in France.</p><p>I make this website, because, we can\\\'t display posts in fullscreen in instagram, posts are everything a bit small, even on mobile wher it\\\'s complicated to enlarge the posts, I wanted to refocused instagram posts on the most important: pictures.<br />So I took the opportunity not to integrate many superfluous things like likes and comments, but you can still find the image on instagram easily.</p><p>Have a good time by using Pretty-instagram, and don\\\'t hesitate to share it to your Friends and on socials networks</p>\';'+
+	'document.getElementById(\'ig-post-content\').innerHTML = \'<h3>Welcome</h3><p>I\\\'m Quentin, and I\\\'m the Developper of Pretty-Instagram. I\\\'m currently in First year of Computer Sciences study (Licence 1 d\\\'informatique for baguette speaker) in France.</p><p>I make this website, because, we can\\\'t display posts in fullscreen in instagram, posts are everytimes a bit small, even on mobile where it\\\'s complicated to enlarge the posts, I wanted to refocused instagram posts on the most important: pictures.<br />So I took the opportunity not to integrate many superfluous things like likes and comments, but you can still find the image on instagram easily.</p><p>Have a good time by using Pretty-instagram, and don\\\'t hesitate to share it to your Friends and on socials networks</p>\';'+
 '};'+
 'document.getElementById(\'search-icon\').addEventListener("click", function(){window.location.assign(\'/\' + document.getElementById(\'input-search\').value);});'+
 'document.getElementById(\'ig-setting\').addEventListener("click", displayAbout);</script>'+
@@ -153,13 +153,12 @@ var loginInsta = async function (user, res) {
 		milieuMessage += '<script type="text/javascript">document.getElementById(\'input-search\').value="' + user + '";</script>';
 		profile = await client.getUserByUsername({username: user});
 		res.status(200);
-		milieuMessage += '<img class="profile_pic" src="' + profile.profile_pic_url + '"><span class="block_name"><h2>@' + profile.username +  '</h2><h3>'+ profile.full_name + '</h3><p class="biography">' + profile.biography + '</p></span><br style="clear:both;" />';
-		if(profile.is_private != true){
+		milieuMessage += '<img class="profile_pic" src="' + profile.profile_pic_url + '"><span class="block_name"><h2>@' + profile.username +  '</h2><h3>'+ profile.full_name + '</h3><p class="biography">' + profile.biography.replace("\n", "<br />") + '</p></span><br style="clear:both;" />';
+		if(profile.is_private === true){
+			milieuMessage += 'private profile';
+		}
 			photo = await client.getPhotosByUsername({username: user, first: 50, after:''});
 			milieuMessage = await displayPicture(photo, milieuMessage);
-		}else{
-			milieuMessage += 'profil privé';
-		}
 	}else{
 		console.log('erreur 1');
 	}
@@ -168,10 +167,10 @@ var loginInsta = async function (user, res) {
 		error = true;
 		console.log(err);
 		if(err.statusCode === 404){
-		milieuMessage += 'Utilisateur introuvable';
+		milieuMessage += 'Unable to find User';
 		}
 		if(err.error.message){
-			milieuMessage += 'Instagram signale une erreur: ' + err.error.message;
+			milieuMessage += 'Instagram display an error: ' + err.error.message;
 		}
 		if(err.error && err.error.message === 'checkpoint_required'){
 			const challengeUrl = err.error.checkpoint_url;
@@ -180,7 +179,7 @@ var loginInsta = async function (user, res) {
 			await client.updateChallenge({challengeUrl, securityCode: '301794'}); // <== securityCode - set code from email.
 		}
 	}finally{
-		if(error === true) milieuMessage += 'Une erreur est survenue';
+		if(error === true) milieuMessage += 'An error has occurred';
 		res.send(message + milieuMessage + finMessage);
 	}
 }
@@ -190,43 +189,49 @@ var displayPicture = async function(photo, milieuMessage, firstLoad = true){
 	let x;
 	if(firstLoad) milieuMessage += '<div id="posts" class="photo">';
 	if(photo.user.edge_owner_to_timeline_media.count < max) max = photo.user.edge_owner_to_timeline_media.count;
-	if(max === 0 ) milieuMessage += 'Aucune image a affiché';
-	for(x = 0; x < max; x++){
-		milieuMessage += '<div class="ig-post">';
-		if(photo.user.edge_owner_to_timeline_media.edges[x].node.__typename == 'GraphSidecar'){
-			milieuMessage += '<div class="graphIcon"><i class="material-icons md-light">filter_none</i></div>';
-		} else{
-			if(photo.user.edge_owner_to_timeline_media.edges[x].node.__typename === 'GraphVideo'){
-				milieuMessage+= '<div class="graphIcon"><i class="material-icons md-light">videocam</i></div>';
+	if(max === 0 || photo.user.edge_owner_to_timeline_media.edges[0] === undefined) {
+		milieuMessage += 'No posts to display';
+	}else{
+		for(x = 0; x < max; x++){
+			milieuMessage += '<div class="ig-post">';
+			if(photo.user.edge_owner_to_timeline_media.edges[x].node.__typename == 'GraphSidecar'){
+				milieuMessage += '<div class="graphIcon"><i class="material-icons md-light">filter_none</i></div>';
+			} else{
+				if(photo.user.edge_owner_to_timeline_media.edges[x].node.__typename === 'GraphVideo'){
+					milieuMessage+= '<div class="graphIcon"><i class="material-icons md-light">videocam</i></div>';
+				}
+			}
+			if(x<5){
+				milieuMessage += '<a href="javascript:showPost(\'' + photo.user.edge_owner_to_timeline_media.edges[x].node.shortcode + '\');"><img src="' + photo.user.edge_owner_to_timeline_media.edges[x].node.thumbnail_src + '"></a>';
+			}else{
+				milieuMessage += '<a href="javascript:showPost(\'' + photo.user.edge_owner_to_timeline_media.edges[x].node.shortcode + '\');"><img class="lazy" data-src="' + photo.user.edge_owner_to_timeline_media.edges[x].node.thumbnail_src + '"></a>';
+			}
+	
+			milieuMessage += '</div>';
+		}
+
+
+		if(firstLoad){
+			if(photo.user.edge_owner_to_timeline_media.page_info.has_next_page === true){
+				milieuMessage += '<div id="last">'+ photo.user.edge_owner_to_timeline_media.page_info.end_cursor + '</div>';
+			}
+		}else{
+			if(photo.user.edge_owner_to_timeline_media.page_info.has_next_page === true){
+				milieuMessage += '<div id="last">' + photo.user.edge_owner_to_timeline_media.page_info.end_cursor + '</div>';
+			}else{
+				milieuMessage += '<div id="last">null</div>';
 			}
 		}
-		if(x<5){
-			milieuMessage += '<a href="javascript:showPost(\'' + photo.user.edge_owner_to_timeline_media.edges[x].node.shortcode + '\');"><img src="' + photo.user.edge_owner_to_timeline_media.edges[x].node.thumbnail_src + '"></a>';
-		}else{
-			milieuMessage += '<a href="javascript:showPost(\'' + photo.user.edge_owner_to_timeline_media.edges[x].node.shortcode + '\');"><img class="lazy" data-src="' + photo.user.edge_owner_to_timeline_media.edges[x].node.thumbnail_src + '"></a>';
+
+		if(firstLoad) milieuMessage += '</div>';
+		if(firstLoad){
+			if(photo.user.edge_owner_to_timeline_media.page_info.has_next_page === true){
+				milieuMessage += '<div style="text-align:center;"><div id="lazyLoadDiv">click here to load more posts</div></div>';
+			}
 		}
 
-		milieuMessage += '</div>';
 	}
-
-	if(firstLoad){
-		if(photo.user.edge_owner_to_timeline_media.page_info.has_next_page === true){
-			milieuMessage += '<div id="last">'+ photo.user.edge_owner_to_timeline_media.page_info.end_cursor + '</div>';
-		}
-	}else{
-		if(photo.user.edge_owner_to_timeline_media.page_info.has_next_page === true){
-			milieuMessage += '<div id="last">' + photo.user.edge_owner_to_timeline_media.page_info.end_cursor + '</div>';
-		}else{
-			milieuMessage += '<div id="last">null</div>';
-		}
-	}
-
-	if(firstLoad) milieuMessage += '</div>';
-	if(firstLoad){
-		if(photo.user.edge_owner_to_timeline_media.page_info.has_next_page === true){
-			milieuMessage += '<div style="text-align:center;"><div id="lazyLoadDiv">click here to load more posts</div></div>';
-		}
-	}
+	
 	milieuMessage += '</div>';
 	return milieuMessage;
 }
