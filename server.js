@@ -82,7 +82,7 @@ var finMessage= '<script type="text/javascript">var lazyloadImages;'+
 		'}'+
 		'},'+
 		'error: function(result, status, error){'+
-			'document.getElementById(\'ig-post-content\').innerHTML = \'Une erreur est survenue: \' + status + \' \' + error;'+
+			'document.getElementById(\'ig-post-content\').innerHTML = \'An error has occurred: \' + status + \' \' + error;'+
 		'}'+
 	'});'+
 '};'+
@@ -127,7 +127,7 @@ var finMessage= '<script type="text/javascript">var lazyloadImages;'+
 			'lazyloadImages = document.querySelectorAll("img.lazy");'+
 		'},'+
 		'error: function(result, status, error){'+
-			'lazyLoadDiv.innerHTML = \'Une erreur est survenue lors du chargement des posts suivant\' + status + \' \' + error;'+
+			'lazyLoadDiv.innerHTML = \'An error has occurred while loading next posts \' + status + \' \' + error;'+
 			'document.removeEventListener("scroll", lazyloadPosts);window.removeEventListener("resize", lazyloadPosts);window.removeEventListener("orientationChange", lazyloadPosts);'+
 		'}'+
 	'});'+
@@ -142,42 +142,55 @@ var finMessage= '<script type="text/javascript">var lazyloadImages;'+
 '</script></body></html>';
 
 
-var loginInsta = async function (user, res) {
+var loginInsta = async function(){
+	try{
+		client = new Instagram({username, password});
+		loginUser = await client.login();
+		if(loginUser.status === 'ok'){
+			console.log('ok');
+		}else{
+			console.log('error 1');
+			process.exit(1);
+		}
+	}catch(err){
+		if(err.error && err.error.message === 'checkpoint_required'){
+			const challengeUrl = err.error.checkpoint_url;
+			await client.updateChallenge({challengeUrl, choice: 1});
+		
+			await client.updateChallenge({challengeUrl, securityCode: '301794'}); // <== securityCode - set code from email.
+		}
+	}
+}
+
+var index = async function (user, res, req) {
 	let profile;
 	let photo;
 	let milieuMessage = '';
 	let error = false;
 	try{
-	client = new Instagram({username, password});
-	loginUser = await client.login();
-	if(loginUser.status === 'ok'){
 		milieuMessage += '<script type="text/javascript">document.getElementById(\'input-search\').value="' + user + '";</script>';
 		profile = await client.getUserByUsername({username: user});
 		res.status(200);
+		console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' '  + req.url + ': 200 Success');
 		milieuMessage += '<img class="profile_pic" src="' + profile.profile_pic_url + '"><span class="block_name"><h2>@' + profile.username +  '</h2><h3>'+ profile.full_name + '</h3><p class="biography">' + profile.biography.replace("\n", "<br />") + '</p></span><br style="clear:both;" />';
 		if(profile.is_private === true){
 			milieuMessage += 'private profile';
 		}
 			photo = await client.getPhotosByUsername({username: user, first: 50, after:''});
 			milieuMessage = await displayPicture(photo, milieuMessage);
-	}else{
-		console.log('erreur 1');
-	}
 	}catch(err){
-		console.log('erreur 2');
+		console.log('error 2');
 		error = true;
 		console.log(err);
 		if(err.statusCode === 404){
 		milieuMessage += 'Unable to find User';
+		res.status(404);
+		console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' ' + req.url + ': 404 Not Found');
 		}
 		if(err.error.message){
 			milieuMessage += 'Instagram display an error: ' + err.error.message;
-		}
-		if(err.error && err.error.message === 'checkpoint_required'){
-			const challengeUrl = err.error.checkpoint_url;
-			await client.updateChallenge({challengeUrl, choice: 1});
-		
-			await client.updateChallenge({challengeUrl, securityCode: '301794'}); // <== securityCode - set code from email.
+			res.status(500);
+			console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' ' + req.url + ': 500 Internal server error');
 		}
 	}finally{
 		if(error === true) milieuMessage += 'An error has occurred';
@@ -237,11 +250,8 @@ var displayPicture = async function(photo, milieuMessage, firstLoad = true){
 	return milieuMessage;
 }
 
-var postsInfo = async function(idPost, res){
+var postsInfo = async function(idPost, res, req){
 	try{
-		var client = new Instagram({username, password});
-		var loginUser = await client.login();
-		if(loginUser.status === 'ok'){
 			const media = await client.getMediaByShortcode({shortcode: idPost});
 			let response = {
 				'type': media.__typename
@@ -271,21 +281,23 @@ var postsInfo = async function(idPost, res){
 				}
 			}
 			res.status(200).send(response);
-		}
+			console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' ' + req.url + ': 200 Success');
 	}catch(err){
 		console.log('error 3');
 		if(err.statusCode === 404){
 			res.status(404).send('<span style="color:white;">Post introuvable</span>');
+			console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' ' + req.url + ': 404 Not Found');
 			return;
 		}else{
-			res.status(500).send('Une erreur est survenue');
+			res.status(500).send('An error has occurred');
+			console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' ' + req.url + ': 500 Internal Serveur Error');
 			console.log(err);
 		}
 	}
 	
 }
 
-var morePost = async function(idLastPost, res, user = 'instagram'){
+var morePost = async function(idLastPost, res, req, user = 'instagram'){
 	let photo;
 	try{
 		client = new Instagram({username, password});
@@ -294,63 +306,75 @@ var morePost = async function(idLastPost, res, user = 'instagram'){
 			photo = await client.getPhotosByUsername({username: user, first: 50, after: idLastPost});
 			let response = '';
 			response = await displayPicture(photo, response, false);
-			res.status(200)
+			res.status(200);
+			console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' ' + req.url + ': 200 Success');
 			res.send(response);
 		}else{
 			console.log('erreur 1.5');
-			res.status(500).send('Une erreur est survenue: impossible de se connecter à instagram');
+			res.status(500).send('An error has occurred: Unable to connect to Instagram');
+			console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' ' + req.url + ': 500 Internal Server Error');
 		}
 	}catch(err){
 		console.log('error 4');
 		if(err.statusCode === 404){
-			res.status(404).send('Page introuvable');
+			res.status(404).send('Unable to find the page');
+			console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' ' + req.url + ': 404 Not Found');
 		}else{
 			if(err.statusCode === 400){
-				res.status(400).send('Code de pagination invalide')
+				res.status(400).send('Invalid pagination code');
+				console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' ' + req.url + ': 400 Bad Request');
 			}else{
-				res.status(500).send('Une erreur est survenue');
+				res.status(500).send('An error has occurred');
+				console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' ' + req.url + ': 500 Internal server error');
 				console.log(err);
 			}
 		}
 	}
 }
 
+loginInsta();
+
 app.use(express.static(__dirname + '/public'))
 .use(bodyParser.json())
 .use(bodyParser.urlencoded({ extended: true}))
 .use(favicon(__dirname + '/public/logo.png'))
 .get('/', function(req, res){
+	res.setHeader('Content-Type', 'text/html; charset=utf-8');
 	res.setHeader('Cache-Control', 'no-store, no-cache, public, no-transform');
 	res.setHeader('Keep-Alive', 'timeout=5, max=1000');
  	let user = "instagram";
-	loginInsta(user, res);
+	index(user, res, req);
 	 
 })
 .post('/', function(req, res){
+	res.setHeader('Content-Type', 'text/html; charset=utf-8');
 	res.setHeader('Cache-Control', 'no-store, no-cache, public, no-transform');
 	res.setHeader('Keep-Alive', 'timeout=5, max=1000');
 	if(req.body.idPost === undefined){
-		morePost(req.body.lastPostId, res);
+		morePost(req.body.lastPostId, res, req);
 	}else{
-		postsInfo(req.body.idPost, res);
+		postsInfo(req.body.idPost, res, req);
 	}
 })
 .get('/:nick', function(req, res){
+	res.setHeader('Content-Type', 'text/html; charset=utf-8');
 	res.setHeader('Cache-Control', 'no-store, no-cache, public, no-transform');
 	res.setHeader('Keep-Alive', 'timeout=5, max=1000');
-	loginInsta(req.params.nick, res);
+	index(req.params.nick, res, req);
 })
 .post('/:nick', function(req, res){
+	res.setHeader('Content-Type', 'text/html; charset=utf-8');
 	res.setHeader('Cache-Control', 'no-store, no-chache, public, no-transform');
 	res.setHeader('Keep-Alive', 'timeout=5, max=1000');
-	morePost(req.body.lastPostId, res, req.params.nick);
+	morePost(req.body.lastPostId, res, req, req.params.nick);
 })
 .use(function(req, res, next){
 	res.status(404);
+	console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' ' + req.url + ': 404 Not Found');
 	res.setHeader('Content-Type', 'text/plain; charset=utf-8');
 	res.setHeader('Cache-Control', 'no-store, no-cache, public, no-transform');
 	res.setHeader('Keep-Alive', 'timeout=5, max=1000');
-	res.send('Page introuvable');
+	res.send('Page not found');
 });
 
 app.listen(3000);
