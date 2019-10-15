@@ -1,6 +1,8 @@
 # pretty-instagram
 
-a node.js web page to display the latest posts of your favorite personalities
+a node.js web page to display the latest posts of your favorite personalities.
+
+If you have a suggestion to improve pretty-instagram, I invite you to open an issue post or/and fork and open a pull request.
 
 ![Screenshot](screenshot.jpg)
 
