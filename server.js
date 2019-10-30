@@ -25,8 +25,8 @@ var message ='<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8" /><titl
 '</style></head><body>'+
 '<div id="fullScreen" style="display:none;"><div class="ig-post-link"><a href="javascript:closeFulllScreen();"><span><i class="material-icons">close</i>Close</span></a><a id="ig-link-to-post" target="_blank" href=""><span style="margin-left:10px;"><i class="material-icons">exit_to_app</i>See on Instagram</span></a></div>'+
 '<div id="ig-post-content" style=""><i class="material-icons rotation">cached</i></div></div>'+
-'<div id="nav"><div class="ig-title">Pretty Instagram</div><div class="ig-search"><input id="input-search" type="text" placaholder="Search" value=""><i class="material-icons" id="search-icon">keyboard_arrow_right</i></div><div id="ig-setting"><i class="material-icons">more_vert</i></div></div>'+
-'<script type="text/javascript">'+
+'<div id="nav"><div class="ig-title">Pretty Instagram</div><div class="ig-search"><input id="input-search" type="text" placeholder="Search" value=""><i class="material-icons" id="search-icon">keyboard_arrow_right</i></div><div id="ig-setting"><i class="material-icons">more_vert</i></div></div>'+
+'<script>'+
 'var displayAbout = function(){'+
 	'displayFullScreen();'+
 	'document.getElementById(\'ig-post-content\').innerHTML = \'<h3>Welcome</h3><p>I\\\'m Quentin, and I\\\'m the Developper of Pretty-Instagram. I\\\'m currently in First year of Computer Sciences study (Licence 1 d\\\'informatique for baguette speaker) in France.</p><p>I make this website, because, we can\\\'t display posts in fullscreen in instagram, posts are everytimes a bit small, even on mobile where it\\\'s complicated to enlarge the posts, I wanted to refocused instagram posts on the most important: pictures.<br />So I took the opportunity not to integrate many superfluous things like likes and comments, but you can still find the image on instagram easily.</p><p>Have a good time by using Pretty-instagram, and don\\\'t hesitate to share it to your Friends and on socials networks</p>\';'+
@@ -37,7 +37,7 @@ var message ='<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8" /><titl
 
 
 
-var finMessage= '<script type="text/javascript">var lazyloadImages;'+
+var finMessage= '<script>var lazyloadImages;'+
 'window.addEventListener(\'load\', function() {'+
 'lazyloadImages = document.querySelectorAll("img.lazy");var lazyloadThrottleTimeout;lazyload();'+
 'function lazyload () {'+
@@ -53,7 +53,7 @@ var finMessage= '<script type="text/javascript">var lazyloadImages;'+
 			'document.removeEventListener("scroll", lazyload);window.removeEventListener("resize", lazyload);window.removeEventListener("orientationChange", lazyload);'+
 		'}}, 20);}'+  
 'document.addEventListener("scroll", lazyload);window.addEventListener("resize", lazyload);window.addEventListener("orientationChange", lazyload);});</script>'+
-'<script type="text/javascript">'+
+'<script>'+
 'var currentCard;'+
 'var obj;'+
 'var showPost = function(id){'+
@@ -114,7 +114,7 @@ var finMessage= '<script type="text/javascript">var lazyloadImages;'+
 '};'+
 
 '</script>'+
-'<script type="text/javascript">'+
+'<script>'+
 'function loadMorePost(lastPostId){'+
 	'$.ajax({'+
 		'url: window.location.href,'+
@@ -168,11 +168,11 @@ var index = async function (user, res, req) {
 	let milieuMessage = '';
 	let error = false;
 	try{
-		milieuMessage += '<script type="text/javascript">document.getElementById(\'input-search\').value="' + user + '";</script>';
+		milieuMessage += '<script>document.getElementById(\'input-search\').value="' + user + '";</script>';
 		profile = await client.getUserByUsername({username: user});
 		res.status(200);
 		console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' '  + req.url + ': 200 Success');
-		milieuMessage += '<img class="profile_pic" src="' + profile.profile_pic_url + '"><span class="block_name"><h2>@' + profile.username +  '</h2><h3>'+ profile.full_name + '</h3><p class="biography">' + profile.biography.replace("\n", "<br />") + '</p></span><br style="clear:both;" />';
+		milieuMessage += '<img class="profile_pic" src="' + profile.profile_pic_url + '"><div class="block_name"><h2>@' + profile.username +  '</h2><h3>'+ profile.full_name + '</h3><p class="biography">' + profile.biography.replace("\n", "<br />") + '</p></div><br style="clear:both;" />';
 		if(profile.is_private === true){
 			milieuMessage += 'private profile';
 		}
@@ -215,11 +215,7 @@ var displayPicture = async function(photo, milieuMessage, firstLoad = true){
 					milieuMessage+= '<div class="graphIcon"><i class="material-icons md-light">videocam</i></div>';
 				}
 			}
-			if(x<5){
-				milieuMessage += '<a href="javascript:showPost(\'' + photo.user.edge_owner_to_timeline_media.edges[x].node.shortcode + '\');"><img src="' + photo.user.edge_owner_to_timeline_media.edges[x].node.thumbnail_src + '"></a>';
-			}else{
-				milieuMessage += '<a href="javascript:showPost(\'' + photo.user.edge_owner_to_timeline_media.edges[x].node.shortcode + '\');"><img class="lazy" data-src="' + photo.user.edge_owner_to_timeline_media.edges[x].node.thumbnail_src + '"></a>';
-			}
+				milieuMessage += '<a href="javascript:showPost(\'' + photo.user.edge_owner_to_timeline_media.edges[x].node.shortcode + '\');"><img class="lazy" src="" data-src="' + photo.user.edge_owner_to_timeline_media.edges[x].node.thumbnail_src + '"></a>';
 	
 			milieuMessage += '</div>';
 		}
