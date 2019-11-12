@@ -1,5 +1,6 @@
 var express = require('express');
 var favicon = require('serve-favicon');
+var compression = require('compression');
 require("dotenv").config();
 var app = express();
 var bodyParser = require('body-parser');
@@ -330,7 +331,8 @@ var morePost = async function(idLastPost, res, req, user = 'instagram'){
 
 loginInsta();
 
-app.use(express.static(__dirname + '/public'))
+app.use(compression())
+.use(express.static(__dirname + '/public'))
 .use(bodyParser.json())
 .use(bodyParser.urlencoded({ extended: true}))
 .use(favicon(__dirname + '/public/logo.png'))
