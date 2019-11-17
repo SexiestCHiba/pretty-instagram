@@ -1,1 +1,4 @@
 theme: jekyll-theme-cayman
+title: Pretty-Instagram
+description: a simple nodejs web page that display the latest posts of your Friends
+show_downloads: true
