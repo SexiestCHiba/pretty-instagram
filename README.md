@@ -4,20 +4,17 @@ a simple node.js web page that display the latest posts of your Friends.
 
 If you have a suggestion to improve pretty-instagram, I invite you to open an issue post or/and fork and open a pull request.
 
-![Screenshot](screenshot.jpg)
+![Screenshot](docs/screenshot.jpg)
 
 Photo credit by [davidderueda](https://www.instagram.com/davidderueda/)
-
 
 ## Feature
 
 * Admire your friends' instagram posts without any disturbing interactions (likes, comments, etc.) to stay focused on the essential.
-* *Lazy Loader* - all posts you don't see on your screen will never load on your device.
+* **Lazy Loader** - all posts you don't see on your screen will never load on your device.
 * See posts in fullscreen.
 
-
 ## Install
-
 
 Choose or create an empty folder before continue and select it on Terminal with `cd /path/folder_name`, then place .package-lock in the folder
 
@@ -30,13 +27,13 @@ Choose or create an empty folder before continue and select it on Terminal with 
 
 ### Installation
 
-- After you have installed all dependencies, put `server.js`, `.env` and `public/` in your folder.
-- Edit `.env` file:  YOUR_USERNAME by your instagram username and YOUR_PASSWORD by your instagram password
-- start the server with: `node server.js`
+* After you have installed all dependencies, put `server.js`, `.env` and `public/` in your folder.
+* Edit `.env` file:  YOUR_USERNAME by your instagram username and YOUR_PASSWORD by your instagram password
+* start the server with: `node server.js`
 
 I recommand you to use `screen` to be able to continue to use the server in background
 
-## Licences
+## LicencesS
 
 The repositories and all files insides, are available under the MIT licences
 
