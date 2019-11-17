@@ -6,7 +6,7 @@ If you have a suggestion to improve pretty-instagram, I invite you to open an is
 
 ![Screenshot](screenshot.jpg)
 
-Photo credit by [davidderueda]( https://www.instagram.com/davidderueda/ )
+Photo credit by [davidderueda](https://www.instagram.com/davidderueda/)
 
 ## Feature
 
