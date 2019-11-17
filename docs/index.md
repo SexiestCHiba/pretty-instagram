@@ -1,8 +1,10 @@
-# pretty-instagram
+# Pretty-Instagram
+
+[go here](http://skull-pixel.fr:3000/) to see a preview of the online last commit or unstable changes.
 
 a simple node.js web page that display the latest posts of your Friends.
 
-If you have a suggestion to improve pretty-instagram, I invite you to open an issue post or/and fork and open a pull request.
+If you have a suggestion to improve Pretty-Instagram, I invite you to open an issue post or/and fork and open a pull request.
 
 ![Screenshot](screenshot.jpg)
 
