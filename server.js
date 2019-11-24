@@ -10,19 +10,19 @@ var loginUser;
 const username = process.env.USERNAME;
 const password = process.env.PASSWORD;
 
-var message ='<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8" /><title>Pretty Instagram</title><link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"><script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>'+
+var message ='<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8" /><title>Pretty Instagram</title><link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"><meta name="viewport" content="width=device-width, initial-scale=1"><script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>'+
 '<style>html{background-color: #fafafa;font-family:Verdana, Geneva, Tahoma, sans-serif;}'+
 'body{margin:0;border:0;padding:0;font-size:16px;font-size:1rem;height:100%;}'+
 '#nav{z-index:100;position:fixed;top:0;left:0;width:100%;height:48px;line-height: 48px;background-color: white;box-shadow: 0px 2px 1px rgba(0, 0, 0, 0.1);font-family: \'Courier New\', Courier, monospace;}'+
 '#nav .ig-title{position:absolute;margin-left: 20px;font-size:20px;font-size:1.5rem;}#nav .ig-search{position:absolute;left:50%;transform: translateX(-50%);width:max-content;height:48px;}#nav #ig-setting{position:absolute;right:0;margin-right: 20px;top:50%;transform: translateY(-50%);}'+
 '.material-icons{position: relative;top:7px;}'+
-'#main{margin:100px;}a{text-decoration:none;color:black;}'+
+'a{text-decoration:none;color:black;}'+
 '#ig-post-content{color:white;width:max-content;max-width:50%;height:max-content;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);}'+
 '.profile_pic{border-radius:50%;float:left;width:150px;height:150px;}.block_name{float:left;margin:0 20px;color: #262626;}.material-icons.md-light{color:rgba(255, 255, 255, 1);}'+ 
 '.photo{z-index:10;display:grid;grid-template-columns: 1fr 1fr 1fr 1fr 1fr;grid-gap:3px;margin-top:30px;}.lazy{min-height:100px;}.ig-post img{width:100%;min-height:50px;height:100%;}.ig-post{grid-column:span 1;grid-row:span 1;min-height:15vw;}.graphIcon{position:absolute;width:max-content;z-index:15;}'+
 '#fullScreen{position:absolute;left:0;width:100%;height:100%;background-color:rgba(0, 0, 0, 0.85);z-index:200;}'+
 '.ig-post-link{position:absolute;top:0px;left:0px;z-index:201;margin-top:10px;font-size:1.2rem;}.ig-post-link a{color:white;}'+
-'@media screen and (max-width: 750px) {#main{margin:40px;}.photo{grid-template-columns: 1fr 1fr;}#ig-post-content{max-width:95%;}.ig-post img{min-height:30px;}}#search-icon{cursor:pointer;}#last{display:none;} '+
+'@media screen and (max-width: 750px) {.photo{grid-template-columns: 1fr 1fr;}#ig-post-content{max-width:95%;}.ig-post img{min-height:30px;}}#search-icon{cursor:pointer;}#last{display:none;} '+
 '</style></head><body>'+
 '<div id="fullScreen" style="display:none;"><div class="ig-post-link"><a href="javascript:closeFulllScreen();"><span><i class="material-icons">close</i>Close</span></a><a id="ig-link-to-post" target="_blank" href=""><span style="margin-left:10px;"><i class="material-icons">exit_to_app</i>See on Instagram</span></a></div>'+
 '<div id="ig-post-content" style=""><i class="material-icons rotation">cached</i></div></div>'+
@@ -30,7 +30,7 @@ var message ='<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8" /><titl
 '<script>'+
 'var displayAbout = function(){'+
 	'displayFullScreen();'+
-	'document.getElementById(\'ig-post-content\').innerHTML = \'<h3>Welcome</h3><p>I\\\'m Quentin, and I\\\'m the Developper of Pretty-Instagram. I\\\'m currently in First year of Computer Sciences study (Licence 1 d\\\'informatique for baguette speaker) in France.</p><p>I make this website, because, we can\\\'t display posts in fullscreen in instagram, posts are everytimes a bit small, even on mobile where it\\\'s complicated to enlarge the posts, I wanted to refocused instagram posts on the most important: pictures.<br />So I took the opportunity not to integrate many superfluous things like likes and comments, but you can still find the image on instagram easily.</p><p>Have a good time by using Pretty-instagram, and don\\\'t hesitate to share it to your Friends and on socials networks</p>\';'+
+	'document.getElementById(\'ig-post-content\').innerHTML = \'<h3>Welcome</h3><p>I\\\'m Quentin, and I\\\'m the Developper of Pretty-Instagram. I\\\'m currently in First grade of Computer Sciences study (Licence 1 d\\\'informatique for baguette speaker) in France.</p><p>I make this website, because, we can\\\'t display posts in fullscreen in instagram, posts are everytimes a bit small, even on mobile where it\\\'s complicated to enlarge the posts, I wanted to refocused instagram posts on the most important: pictures.<br />So I took the opportunity not to integrate many superfluous things like likes and comments, but you can still find the image on instagram easily.</p><p>Have a good time by using Pretty-instagram, and don\\\'t hesitate to share it to your Friends and on socials networks</p>\';'+
 '};'+
 'document.getElementById(\'search-icon\').addEventListener("click", function(){window.location.assign(\'/\' + document.getElementById(\'input-search\').value);});'+
 'document.getElementById(\'ig-setting\').addEventListener("click", displayAbout);</script>'+
@@ -173,7 +173,7 @@ var index = async function (user, res, req) {
 		profile = await client.getUserByUsername({username: user});
 		res.status(200);
 		console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' '  + req.url + ': 200 Success');
-		milieuMessage += '<img class="profile_pic" src="' + profile.profile_pic_url + '"><div class="block_name"><h2>@' + profile.username +  '</h2><h3>'+ profile.full_name + '</h3><p class="biography">' + profile.biography.replace("\n", "<br />") + '</p></div><br style="clear:both;" />';
+		milieuMessage += '<img class="profile_pic" alt="' + profile.username + '" src="' + profile.profile_pic_url + '"><div class="block_name"><h2>@' + profile.username +  '</h2><h3>'+ profile.full_name + '</h3><p class="biography">' + profile.biography.replace("\n", "<br />") + '</p></div><br style="clear:both;" />';
 		if(profile.is_private === true){
 			milieuMessage += 'private profile';
 		}
@@ -216,7 +216,17 @@ var displayPicture = async function(photo, milieuMessage, firstLoad = true){
 					milieuMessage+= '<div class="graphIcon"><i class="material-icons md-light">videocam</i></div>';
 				}
 			}
-				milieuMessage += '<a href="javascript:showPost(\'' + photo.user.edge_owner_to_timeline_media.edges[x].node.shortcode + '\');"><img class="lazy" title="' + photo.user.edge_owner_to_timeline_media.edges[x].node.edge_media_to_caption.edges[0].node.text.replace(/"/g, '&quot;').replace(/'/g, '&apos;') + '" alt="' + photo.user.edge_owner_to_timeline_media.edges[x].node.edge_media_to_caption.edges[0].node.text.replace(/"/g, '&quot;').replace(/'/g, '&apos;') + '" data-src="' + photo.user.edge_owner_to_timeline_media.edges[x].node.thumbnail_src + '"></a>';
+			milieuMessage += '<a href="javascript:showPost(\'' + photo.user.edge_owner_to_timeline_media.edges[x].node.shortcode + '\');"><img class="lazy"'; 
+
+			if(photo.user.edge_owner_to_timeline_media.edges[x].node.edge_media_to_caption.edges[0] != undefined){
+				milieuMessage += 'title="' + photo.user.edge_owner_to_timeline_media.edges[x].node.edge_media_to_caption.edges[0].node.text.replace(/"/g, '&quot;').replace(/'/g, '&apos;') + '" alt="' + photo.user.edge_owner_to_timeline_media.edges[x].node.edge_media_to_caption.edges[0].node.text.replace(/"/g, '&quot;').replace(/'/g, '&apos;') + '"';
+
+			}else{
+				milieuMessage += 'alt="Post don\'t have a description"';
+			}
+
+			milieuMessage += 'data-src="' + photo.user.edge_owner_to_timeline_media.edges[x].node.thumbnail_src + '"></a>';
+
 	
 			milieuMessage += '</div>';
 		}
