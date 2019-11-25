@@ -16,13 +16,18 @@ var message ='<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8" /><titl
 '#nav{z-index:100;position:fixed;top:0;left:0;width:100%;height:48px;line-height: 48px;background-color: white;box-shadow: 0px 2px 1px rgba(0, 0, 0, 0.1);font-family: \'Courier New\', Courier, monospace;}'+
 '#nav .ig-title{position:absolute;margin-left: 20px;font-size:20px;font-size:1.5rem;}#nav .ig-search{position:absolute;left:50%;transform: translateX(-50%);width:max-content;height:48px;}#nav #ig-setting{position:absolute;right:0;margin-right: 20px;top:50%;transform: translateY(-50%);}'+
 '.material-icons{position: relative;top:7px;}'+
-'a{text-decoration:none;color:black;}'+
+'main{margin:50px 0px;}a{text-decoration:none;color:black;}'+
 '#ig-post-content{color:white;width:max-content;max-width:50%;height:max-content;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);}'+
 '.profile_pic{border-radius:50%;float:left;width:150px;height:150px;}.block_name{float:left;margin:0 20px;color: #262626;}.material-icons.md-light{color:rgba(255, 255, 255, 1);}'+ 
 '.photo{z-index:10;display:grid;grid-template-columns: 1fr 1fr 1fr 1fr 1fr;grid-gap:3px;margin-top:30px;}.lazy{min-height:100px;}.ig-post img{width:100%;min-height:50px;height:100%;}.ig-post{grid-column:span 1;grid-row:span 1;min-height:15vw;}.graphIcon{position:absolute;width:max-content;z-index:15;}'+
 '#fullScreen{position:absolute;left:0;width:100%;height:100%;background-color:rgba(0, 0, 0, 0.85);z-index:200;}'+
-'.ig-post-link{position:absolute;top:0px;left:0px;z-index:201;margin-top:10px;font-size:1.2rem;}.ig-post-link a{color:white;}'+
+'.ig-post-link{position:absolute;top:0px;left:0px;z-index:201;margin-top:10px;font-size:1.2rem;}.ig-post-link a{color:white;}#lazyLoadDiv{padding:20px;}.rotation{animation-name: loading;animation-duration: 1s;animation-iteration-count: infinite;animation-timing-function: linear;}'+
 '@media screen and (max-width: 750px) {.photo{grid-template-columns: 1fr 1fr;}#ig-post-content{max-width:95%;}.ig-post img{min-height:30px;}}#search-icon{cursor:pointer;}#last{display:none;} '+
+'@keyframes loading{'+
+	'0%{transform: rotate(360deg);}'+
+	'50%{transform: rotate(180deg);}'+
+	'100%{transform:rotate(0deg);}'+
+'}'+
 '</style></head><body>'+
 '<div id="fullScreen" style="display:none;"><div class="ig-post-link"><a href="javascript:closeFulllScreen();"><span><i class="material-icons">close</i>Close</span></a><a id="ig-link-to-post" target="_blank" href=""><span style="margin-left:10px;"><i class="material-icons">exit_to_app</i>See on Instagram</span></a></div>'+
 '<div id="ig-post-content" style=""><i class="material-icons rotation">cached</i></div></div>'+
@@ -34,7 +39,7 @@ var message ='<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8" /><titl
 '};'+
 'document.getElementById(\'search-icon\').addEventListener("click", function(){window.location.assign(\'/\' + document.getElementById(\'input-search\').value);});'+
 'document.getElementById(\'ig-setting\').addEventListener("click", displayAbout);</script>'+
-'<div id="main">';
+'<main>';
 
 
 
@@ -140,7 +145,8 @@ var finMessage= '<script>var lazyloadImages;'+
 	'loadMorePost(elements[elements.length-1].innerHTML);'+
 	'}'+
 	'document.getElementById(\'lazyLoadDiv\').addEventListener("click", lazyloadPosts);'+
-'</script></body></html>';
+'</script>'+
+'</main></body></html>';
 
 
 var loginInsta = async function(){
@@ -219,13 +225,13 @@ var displayPicture = async function(photo, milieuMessage, firstLoad = true){
 			milieuMessage += '<a href="javascript:showPost(\'' + photo.user.edge_owner_to_timeline_media.edges[x].node.shortcode + '\');"><img class="lazy"'; 
 
 			if(photo.user.edge_owner_to_timeline_media.edges[x].node.edge_media_to_caption.edges[0] != undefined){
-				milieuMessage += 'title="' + photo.user.edge_owner_to_timeline_media.edges[x].node.edge_media_to_caption.edges[0].node.text.replace(/"/g, '&quot;').replace(/'/g, '&apos;') + '" alt="' + photo.user.edge_owner_to_timeline_media.edges[x].node.edge_media_to_caption.edges[0].node.text.replace(/"/g, '&quot;').replace(/'/g, '&apos;') + '"';
+				milieuMessage += ' title="' + photo.user.edge_owner_to_timeline_media.edges[x].node.edge_media_to_caption.edges[0].node.text.replace(/"/g, '&quot;').replace(/'/g, '&apos;') + '" alt="' + photo.user.edge_owner_to_timeline_media.edges[x].node.edge_media_to_caption.edges[0].node.text.replace(/"/g, '&quot;').replace(/'/g, '&apos;') + '"';
 
 			}else{
-				milieuMessage += 'alt="Post don\'t have a description"';
+				milieuMessage += ' alt="Post don\'t have a description"';
 			}
 
-			milieuMessage += 'data-src="' + photo.user.edge_owner_to_timeline_media.edges[x].node.thumbnail_src + '"></a>';
+			milieuMessage += ' data-src="' + photo.user.edge_owner_to_timeline_media.edges[x].node.thumbnail_src + '" src=""></a>';
 
 	
 			milieuMessage += '</div>';
@@ -253,7 +259,6 @@ var displayPicture = async function(photo, milieuMessage, firstLoad = true){
 
 	}
 	
-	milieuMessage += '</div>';
 	return milieuMessage;
 }
 
@@ -317,7 +322,6 @@ var morePost = async function(idLastPost, res, req, user = 'instagram'){
 			console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' ' + req.url + ': 200 Success');
 			res.send(response);
 		}else{
-			console.log('erreur 1.5');
 			res.status(500).send('An error has occurred: Unable to connect to Instagram');
 			console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' ' + req.url + ': 500 Internal Server Error');
 		}
