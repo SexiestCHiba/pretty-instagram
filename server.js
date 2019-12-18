@@ -1,6 +1,7 @@
 var express = require('express');
 var favicon = require('serve-favicon');
 var compression = require('compression');
+var fs = require('fs');
 require("dotenv").config();
 var app = express();
 var bodyParser = require('body-parser');
@@ -13,6 +14,10 @@ const password = process.env.PASSWORD;
 var message = require('./env').message;
 var finMessage = require('./env').finMessage;
 
+var fullscreen = fs.readFileSync('public/fullscreen.js', 'utf8');
+var lazyloader = fs.readFileSync('public/lazyloader.js', 'utf8');
+var loadPosts = fs.readFileSync('public/loadPosts.js', 'utf8');
+var displayAbout = fs.readFileSync('public/displayAbout.js', 'utf8');
 
 var loginInsta = async function(){
 	try{
@@ -44,7 +49,7 @@ var index = async function (user, res, req) {
 		profile = await client.getUserByUsername({username: user});
 		res.status(200);
 		console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' '  + req.url + ': 200 Success');
-		milieuMessage += '<img class="profile_pic" alt="' + profile.username + '" src="' + profile.profile_pic_url + '"><div class="block_name"><h2>@' + profile.username +  '</h2><h3>'+ profile.full_name + '</h3><p class="biography">' + profile.biography.replace("\n", "<br />") + '</p></div><br style="clear:both;" />';
+		milieuMessage += '<div id="profile_infos"><img id="profile_pic" alt="' + profile.username + '" src="' + profile.profile_pic_url + '"><div id="profile_name"><h2>@' + profile.username +  '</h2><h3>'+ profile.full_name + '</h3><p id="profile_biography">' + profile.biography.replace("\n", "<br />") + '</p></div></div><br style="clear:both;" />';
 		if(profile.is_private === true){
 			milieuMessage += 'private profile';
 		}
@@ -244,6 +249,34 @@ app.use(compression())
 	res.setHeader('Cache-Control', 'no-store, no-chache, public, no-transform');
 	res.setHeader('Keep-Alive', 'timeout=5, max=1000');
 	morePost(req.body.lastPostId, res, req, req.params.nick);
+})
+.get('/public/fullscreen.js', function(req,res){
+	res.setHeader('Content-Type', 'text/html; charset=utf-8');
+	res.setHeader('Cache-Control', 'no-store, no-chache, public, no-transform');
+	res.setHeader('Keep-Alive', 'timeout=5, max=1000');
+	console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' ' + req.url + ': 200 Success');
+	res.status(200).send(fullscreen);
+})
+.get('/public/lazyloader.js', function(req,res){
+	res.setHeader('Content-Type', 'text/html; charset=utf-8');
+	res.setHeader('Cache-Control', 'no-store, no-chache, public, no-transform');
+	res.setHeader('Keep-Alive', 'timeout=5, max=1000');
+	console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' ' + req.url + ': 200 Success');
+	res.status(200).send(lazyloader);
+})
+.get('/public/loadPosts.js', function(req,res){
+	res.setHeader('Content-Type', 'text/html; charset=utf-8');
+	res.setHeader('Cache-Control', 'no-store, no-chache, public, no-transform');
+	res.setHeader('Keep-Alive', 'timeout=5, max=1000');
+	console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' ' + req.url + ': 200 Success');
+	res.status(200).send(loadPosts);
+})
+.get('/public/displayAbout.js', function(req,res){
+	res.setHeader('Content-Type', 'text/html; charset=utf-8');
+	res.setHeader('Cache-Control', 'no-store, no-chache, public, no-transform');
+	res.setHeader('Keep-Alive', 'timeout=5, max=1000');
+	console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' ' + req.url + ': 200 Success');
+	res.status(200).send(displayAbout);
 })
 .use(function(req, res, next){
 	res.status(404);
