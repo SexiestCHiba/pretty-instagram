@@ -1,5 +1,4 @@
 var message ='<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8" /><title>Pretty Instagram</title><link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"><meta name="viewport" content="width=device-width, initial-scale=1"><script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>'+
-'<meta name="google-site-verification" content="aK25scdnB4IyDhKzluvxF9-xNCZUha1rZJm9Vl_0HgU" />'+
 '<style>html{background-color: #fafafa;font-family:Verdana, Geneva, Tahoma, sans-serif;}'+
 'body{margin:0;border:0;padding:0;font-size:16px;font-size:1rem;height:100%;}'+
 '#nav{z-index:100;position:fixed;top:0;left:0;width:100%;height:48px;line-height: 48px;background-color: white;box-shadow: 0px 2px 1px rgba(0, 0, 0, 0.1);font-family: \'Courier New\', Courier, monospace;}'+
