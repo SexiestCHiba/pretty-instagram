@@ -50,12 +50,13 @@ var closeFulllScreen = function(){
 	document.getElementById('fullScreen').setAttribute('style', 'display:none;');
 	document.getElementById('ig-link-to-post').setAttribute('href', '');
 	document.getElementById('ig-post-content').innerHTML = '<i class="material-icons rotation">cached</i>';
+	document.getElementById('ig-post-content').classList.remove("about");
 };
 var removeTextSection = function(){
 	if(document.getElementById('ig-post-content').classList.contains('story')){
 		document.getElementById('ig-post-text').setAttribute('style', 'display:none;');
 	}else{
-		document.getElementById('ig-post-text').setAttribute('style', 'display:block;');
+		document.getElementById('ig-post-text').setAttribute('style', '');
 	}
 }
 

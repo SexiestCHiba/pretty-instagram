@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="utf-8" />
     <title>Pretty Instagram</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <style>
-        *{
+        * {
             box-sizing: border-box;
         }
+
         html {
             background-color: #fafafa;
             font-family: Verdana, Geneva, Tahoma, sans-serif;
@@ -75,62 +77,73 @@
         }
 
         #ig-post-content {
-            color:white;
+            color: white;
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            height:90%;
+            height: 90%;
         }
 
-        #ig-post-content img, #ig-post-content video{
-            height:100%;
-            width:auto;
+        #ig-post-content img,
+        #ig-post-content video {
+            max-height: 100%;
+            width: auto;
         }
 
-        #ig-post-arrow-right, #ig-post-arrow-left, #ig-story-arrow-right, #ig-story-arrow-left{
-            cursor:pointer;
-            position:absolute;
-            top:50%;
+        .about{
+            overflow:auto;
+        }
+
+        #ig-post-arrow-right,
+        #ig-post-arrow-left,
+        #ig-story-arrow-right,
+        #ig-story-arrow-left {
+            cursor: pointer;
+            position: absolute;
+            top: 50%;
             transform: translateY(-50%);
-            max-width:100%;
-            height:auto;
+            max-width: 100%;
+            height: auto;
         }
 
-        #ig-post-arrow-right, #ig-story-arrow-right{
-            right:-30px;
+        #ig-post-arrow-right,
+        #ig-story-arrow-right {
+            right: -30px;
         }
 
-        #ig-post-arrow-left, #ig-story-arrow-left{
-            left:-30px;
+        #ig-post-arrow-left,
+        #ig-story-arrow-left {
+            left: -30px;
         }
 
-        #ig-post-text{
-            position:absolute;
-            top:0;
-            right:0;
-            height:100%;
-            width:400px;
-            padding:10px;
-            background-color:white;
+        #ig-post-text {
+            position: absolute;
+            top: 0;
+            right: 0;
+            height: 100%;
+            width: 400px;
+            padding: 10px;
+            background-color: white;
             transform: translateX(350px);
             transition: .3s transform linear;
         }
 
-        #ig-post-text:hover{
-            transform:translateX(0);
+        #ig-post-text:hover {
+            transform: translateX(0);
         }
 
-        .ig-post-text-owner{
-            border-bottom:1px solid #efefef;
-            margin-bottom:10px;
+        .ig-post-text-owner {
+            border-bottom: 1px solid #efefef;
+            margin-bottom: 10px;
         }
-        .ig-post-text-owner img{
-            width:50px;
-            height:50px;
-            margin-right:15px;
-            border-radius:50%;
-            vertical-align:middle;
+
+        .ig-post-text-owner img {
+            width: 50px;
+            height: 50px;
+            margin-right: 15px;
+            border-radius: 50%;
+            vertical-align: middle;
         }
 
         #profile_infos {
@@ -144,8 +157,8 @@
             height: 150px;
         }
 
-        .haveStory{
-            border:3px solid #e34461;
+        .haveStory {
+            border: 3px solid #e34461;
             cursor: pointer;
         }
 
@@ -155,11 +168,11 @@
             color: #262626;
         }
 
-        .centered{
+        .centered {
             position: absolute;
-            top:50%;
-            left:50%;
-            transform: translate(-50%,  -50%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
         }
 
         .material-icons.md-light {
@@ -239,16 +252,29 @@
 
         @media screen and (max-width: 768px) {
             .photo {
-                grid-template-columns: 1fr 1fr;
+                grid-template-columns: 1fr;
             }
 
             .ig-post img {
                 min-height: 30px;
             }
 
-            #ig-post-text{
-                width:75%;
-                transform: translateX(80%);
+            #ig-post-content {
+                height: 50%;
+            }
+
+            #ig-post-arrow-right,
+            #ig-story-arrow-right {
+                right: 20px;
+            }
+
+            #ig-post-arrow-left,
+            #ig-story-arrow-left {
+                left: 20px;
+            }
+
+            #ig-post-text {
+                display: none;
             }
         }
 
@@ -256,15 +282,18 @@
             0% {
                 transform: rotate(360deg);
             }
+
             50% {
                 transform: rotate(180deg);
             }
+
             100% {
                 transform: rotate(0deg);
             }
         }
     </style>
 </head>
+
 <body>
     <div id="fullScreen" style="display:none;">
         <div class="ig-post-link"><a href="javascript:closeFulllScreen();"><span><i
