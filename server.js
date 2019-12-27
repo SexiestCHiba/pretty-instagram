@@ -1,66 +1,62 @@
 var express = require('express');
 var favicon = require('serve-favicon');
 var compression = require('compression');
-var fs = require('fs');
 require("dotenv").config();
 var app = express();
 var bodyParser = require('body-parser');
 const Instagram = require('instagram-web-api');
+const env = require("./env");
 var client;
 var loginUser;
+
 const username = process.env.USERNAME;
 const password = process.env.PASSWORD;
-
-var message = require('./env').message;
-var finMessage = require('./env').finMessage;
-
-var fullscreen = fs.readFileSync('public/fullscreen.js', 'utf8');
-var lazyloader = fs.readFileSync('public/lazyloader.js', 'utf8');
-var loadPosts = fs.readFileSync('public/loadPosts.js', 'utf8');
-var displayAbout = fs.readFileSync('public/displayAbout.js', 'utf8');
+const message = env.message;
+const finMessage = env.finMessage;
+const fullscreen = env.fullscreen;
+const lazyloader = env.lazyloader;
+const loadPosts = env.loadPosts;
+const displayAbout = env.displayAbout;
+const story = env.story;
+const error404 = env.error404;
 
 var loginInsta = async function(){
+	client = new Instagram({username, password});
 	try{
-		client = new Instagram({username, password});
 		loginUser = await client.login();
 		if(loginUser.status === 'ok'){
-			console.log('ok');
+			console.log('Connected');
 		}else{
-			console.log('error 1');
-			process.exit(1);
+			console.log('Unable to connect to your Instagram account');
+			console.log(loginUser.status);
 		}
 	}catch(err){
 		if(err.error && err.error.message === 'checkpoint_required'){
 			const challengeUrl = err.error.checkpoint_url;
-			await client.updateChallenge({challengeUrl, choice: 1});
+			client.updateChallenge({challengeUrl, choice: 1});
 		
-			await client.updateChallenge({challengeUrl, securityCode: '301794'}); // <== securityCode - set code from email.
+			client.updateChallenge({challengeUrl, securityCode: '301794'}); // <== securityCode - set code from email.
 		}
 	}
 }
 
 var index = async function (user, res, req) {
 	let profile;
-	let photo;
 	let milieuMessage = '';
-	let error = false;
 	try{
-		milieuMessage += '<script>document.getElementById(\'input-search\').value="' + user + '";</script>';
+		milieuMessage += '<script>var username = "'+ user + '";document.getElementById(\'input-search\').value="' + user + '";</script>';
 		profile = await client.getUserByUsername({username: user});
 		res.status(200);
 		console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' '  + req.url + ': 200 Success');
-		milieuMessage += '<div id="profile_infos"><img id="profile_pic" alt="' + profile.username + '" src="' + profile.profile_pic_url + '"><div id="profile_name"><h2>@' + profile.username +  '</h2><h3>'+ profile.full_name + '</h3><p id="profile_biography">' + profile.biography.replace("\n", "<br />") + '</p></div></div><br style="clear:both;" />';
+		milieuMessage += '<div id="profile_infos"><img id="profile_pic" alt="' + profile.username + '" src="' + profile.profile_pic_url + '"><div id="profile_name"><h2>@' + profile.username +  '</h2><h3>'+ profile.full_name + '</h3><p id="profile_biography">' + profile.biography.replace(/\n/g, "<br />") + '</p></div></div><br style="clear:both;" />';
 		if(profile.is_private === true){
 			milieuMessage += 'private profile';
 		}
-			photo = await client.getPhotosByUsername({username: user, first: 50, after:''});
-			milieuMessage = await displayPicture(photo, milieuMessage);
+			milieuMessage = await displayPicture(await client.getPhotosByUsername({username: user, first: 50, after:''}), milieuMessage);
 	}catch(err){
 		console.log('error 2');
-		error = true;
-		console.log(err);
 		if(err.statusCode === 404){
-		milieuMessage += 'Unable to find User';
+		milieuMessage += '<div class="centered">Unable to find User</div>';
 		res.status(404);
 		console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' ' + req.url + ': 404 Not Found');
 		}
@@ -70,12 +66,11 @@ var index = async function (user, res, req) {
 			console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' ' + req.url + ': 500 Internal server error');
 		}
 	}finally{
-		if(error === true) milieuMessage += 'An error has occurred';
 		res.send(message + milieuMessage + finMessage);
 	}
 }
 
-var displayPicture = async function(photo, milieuMessage, firstLoad = true){
+var displayPicture = function(photo, milieuMessage, firstLoad = true){
 	let max = 50;
 	let x;
 	if(firstLoad) milieuMessage += '<div id="posts" class="photo">';
@@ -136,8 +131,14 @@ var postsInfo = async function(idPost, res, req){
 	try{
 			const media = await client.getMediaByShortcode({shortcode: idPost});
 			let response = {
-				'type': media.__typename
+				'type': media.__typename,
+				'owner': media.owner.username,
+				'profile_pic': media.owner.profile_pic_url,
+				'description': ""
 			};
+			if(media.edge_media_to_caption.edges[0] !== undefined){
+				response.description = media.edge_media_to_caption.edges[0].node.text;
+			}
 			if(media.__typename !== 'GraphSidecar' && media.__typename !== 'GraphVideo'){
 				response.photo = media.display_url;
 			}else{
@@ -182,19 +183,10 @@ var postsInfo = async function(idPost, res, req){
 var morePost = async function(idLastPost, res, req, user = 'instagram'){
 	let photo;
 	try{
-		client = new Instagram({username, password});
-		loginUser = await client.login();
-		if(loginUser.status === 'ok'){
-			photo = await client.getPhotosByUsername({username: user, first: 50, after: idLastPost});
-			let response = '';
-			response = await displayPicture(photo, response, false);
+			response = await displayPicture(await client.getPhotosByUsername({username: user, first: 50, after: idLastPost}), '', false);
 			res.status(200);
 			console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' ' + req.url + ': 200 Success');
 			res.send(response);
-		}else{
-			res.status(500).send('An error has occurred: Unable to connect to Instagram');
-			console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' ' + req.url + ': 500 Internal Server Error');
-		}
 	}catch(err){
 		console.log('error 4');
 		if(err.statusCode === 404){
@@ -209,6 +201,37 @@ var morePost = async function(idLastPost, res, req, user = 'instagram'){
 				console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' ' + req.url + ': 500 Internal server error');
 				console.log(err);
 			}
+		}
+	}
+}
+
+var storyJson = async function(username, res, req){
+	try{
+		let story = await client.getStoryItemsByUsername({username});
+		let response = {
+			'count': story.length
+		}
+		for(i in story){
+			response[i] = {
+				'type': story[i].__typename,
+				'ressource':{
+				'image': story[i].display_resources[story[i].display_resources.length-1].src
+				}
+			};
+			if(story[i].__typename == "GraphStoryVideo"){
+				response[i].ressource.video = story[i].video_resources[story[i].video_resources.length-1].src;
+			}
+		}
+		res.status(200).send(response);
+	}catch(err){
+		if(err.statusCode === 404){
+			// unable to find user
+			res.status(404);
+			console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' ' + req.url + ': 404 Not Found');
+			response = {
+				error: 404
+			};
+			res.send(reponse);
 		}
 	}
 }
@@ -232,59 +255,68 @@ app.use(compression())
 	res.setHeader('Content-Type', 'text/html; charset=utf-8');
 	res.setHeader('Cache-Control', 'no-store, no-cache, public, no-transform');
 	res.setHeader('Keep-Alive', 'timeout=5, max=1000');
-	if(req.body.idPost === undefined){
-		morePost(req.body.lastPostId, res, req);
-	}else{
+	if(req.body.idPost !== undefined){
 		postsInfo(req.body.idPost, res, req);
+	}else{
+		if(req.body.story !== undefined){
+			storyJson(req.body.story, res, req);
+		}else{
+			if(req.body.lastPostId !== undefined){
+				morePost(req.body.lastPostId, res, req);
+			}else{
+				res.status(400).send("Bad request");
+			}
+		}
 	}
 })
 .get('/:nick', function(req, res){
 	res.setHeader('Content-Type', 'text/html; charset=utf-8');
-	res.setHeader('Cache-Control', 'no-store, no-cache, public, no-transform');
+	res.setHeader('Cache-Control', 'no-store, no-cache, public');
 	res.setHeader('Keep-Alive', 'timeout=5, max=1000');
 	index(req.params.nick, res, req);
 })
 .post('/:nick', function(req, res){
 	res.setHeader('Content-Type', 'text/html; charset=utf-8');
-	res.setHeader('Cache-Control', 'no-store, no-chache, public, no-transform');
+	res.setHeader('Cache-Control', 'no-store, no-cache, public');
 	res.setHeader('Keep-Alive', 'timeout=5, max=1000');
 	morePost(req.body.lastPostId, res, req, req.params.nick);
 })
 .get('/public/fullscreen.js', function(req,res){
-	res.setHeader('Content-Type', 'text/html; charset=utf-8');
-	res.setHeader('Cache-Control', 'no-store, no-chache, public, no-transform');
+	res.setHeader('Content-Type', 'text/javascript; charset=utf-8');
+	res.setHeader('Cache-Control', 'public');
 	res.setHeader('Keep-Alive', 'timeout=5, max=1000');
-	console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' ' + req.url + ': 200 Success');
 	res.status(200).send(fullscreen);
 })
 .get('/public/lazyloader.js', function(req,res){
-	res.setHeader('Content-Type', 'text/html; charset=utf-8');
-	res.setHeader('Cache-Control', 'no-store, no-chache, public, no-transform');
+	res.setHeader('Content-Type', 'text/javascript; charset=utf-8');
+	res.setHeader('Cache-Control', 'public');
 	res.setHeader('Keep-Alive', 'timeout=5, max=1000');
-	console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' ' + req.url + ': 200 Success');
 	res.status(200).send(lazyloader);
 })
 .get('/public/loadPosts.js', function(req,res){
-	res.setHeader('Content-Type', 'text/html; charset=utf-8');
-	res.setHeader('Cache-Control', 'no-store, no-chache, public, no-transform');
+	res.setHeader('Content-Type', 'text/javascript; charset=utf-8');
+	res.setHeader('Cache-Control', 'public');
 	res.setHeader('Keep-Alive', 'timeout=5, max=1000');
-	console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' ' + req.url + ': 200 Success');
 	res.status(200).send(loadPosts);
 })
 .get('/public/displayAbout.js', function(req,res){
-	res.setHeader('Content-Type', 'text/html; charset=utf-8');
-	res.setHeader('Cache-Control', 'no-store, no-chache, public, no-transform');
+	res.setHeader('Content-Type', 'text/javascript; charset=utf-8');
+	res.setHeader('Cache-Control', 'public');
 	res.setHeader('Keep-Alive', 'timeout=5, max=1000');
-	console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' ' + req.url + ': 200 Success');
 	res.status(200).send(displayAbout);
+}).get('/public/story.js', function(req,res){
+	res.setHeader('Content-Type', 'text/javascript; charset=utf-8');
+	res.setHeader('Cache-Control', 'public');
+	res.setHeader('Keep-Alive', 'timeout=5, max=1000');
+	res.status(200).send(story);
 })
 .use(function(req, res, next){
 	res.status(404);
 	console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' ' + req.url + ': 404 Not Found');
-	res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-	res.setHeader('Cache-Control', 'no-store, no-cache, public, no-transform');
+	res.setHeader('Content-Type', 'text/html; charset=utf-8');
+	res.setHeader('Cache-Control', 'no-cache, public, no-transform');
 	res.setHeader('Keep-Alive', 'timeout=5, max=1000');
-	res.send('Page not found');
+	res.send(error404);
 });
 
 app.listen(3000);

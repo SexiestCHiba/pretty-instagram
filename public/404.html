@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <title>Error 404 - Pretty Instagram</title>
+</head>
+<style>
+    html {
+        background-color: #fafafa;
+    }
+
+    main {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+    }
+
+    #title {
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 20px;
+        font-size: 1.5rem;
+    }
+
+    button {
+        background-color: transparent;
+        margin: 0 6px;
+        padding: 5px 9px;
+        border: 1px solid rgb(209, 209, 209);
+        box-shadow: none;
+        border-radius: 4px;
+    }
+</style>
+<body>
+    <main>
+        <p id="title">Pretty-Instagram</p>
+        <p>Erreur 404 - la page que vous recherchez n'est pas disponible</p>
+        <button id="HistoryBack">Retour en arrière</button>
+        <button id="home">Page d'accueil</button>
+    </main>
+    <script>
+    document.getElementById('HistoryBack').addEventListener("click", function(){
+        window.history.back();
+    });
+    document.getElementById("home").addEventListener("click", function(){
+        window.location.assign('/');
+    });
+    </script>
+</body>
+</html>
