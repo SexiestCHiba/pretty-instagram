@@ -14,9 +14,7 @@ const password = process.env.PASSWORD;
 const message = env.message;
 const finMessage = env.finMessage;
 const fullscreen = env.fullscreen;
-const lazyloader = env.lazyloader;
 const loadPosts = env.loadPosts;
-const displayAbout = env.displayAbout;
 const story = env.story;
 const error404 = env.error404;
 
@@ -118,7 +116,7 @@ var displayPicture = function(photo, milieuMessage, firstLoad = true){
 		if(firstLoad) milieuMessage += '</div>';
 		if(firstLoad){
 			if(photo.user.edge_owner_to_timeline_media.page_info.has_next_page === true){
-				milieuMessage += '<div style="text-align:center;"><div id="lazyLoadDiv">click here to load more posts</div></div>';
+				milieuMessage += '<div style="text-align:center;"><button id="lazyLoadDiv">click here to load more posts</button></div>';
 			}
 		}
 
@@ -287,24 +285,13 @@ app.use(compression())
 	res.setHeader('Keep-Alive', 'timeout=5, max=1000');
 	res.status(200).send(fullscreen);
 })
-.get('/public/lazyloader.js', function(req,res){
-	res.setHeader('Content-Type', 'text/javascript; charset=utf-8');
-	res.setHeader('Cache-Control', 'public');
-	res.setHeader('Keep-Alive', 'timeout=5, max=1000');
-	res.status(200).send(lazyloader);
-})
 .get('/public/loadPosts.js', function(req,res){
 	res.setHeader('Content-Type', 'text/javascript; charset=utf-8');
 	res.setHeader('Cache-Control', 'public');
 	res.setHeader('Keep-Alive', 'timeout=5, max=1000');
 	res.status(200).send(loadPosts);
 })
-.get('/public/displayAbout.js', function(req,res){
-	res.setHeader('Content-Type', 'text/javascript; charset=utf-8');
-	res.setHeader('Cache-Control', 'public');
-	res.setHeader('Keep-Alive', 'timeout=5, max=1000');
-	res.status(200).send(displayAbout);
-}).get('/public/story.js', function(req,res){
+.get('/public/story.js', function(req,res){
 	res.setHeader('Content-Type', 'text/javascript; charset=utf-8');
 	res.setHeader('Cache-Control', 'public');
 	res.setHeader('Keep-Alive', 'timeout=5, max=1000');
