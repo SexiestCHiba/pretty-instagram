@@ -32,8 +32,8 @@ var loginInsta = async function(){
 		if(err.error && err.error.message === 'checkpoint_required'){
 			const challengeUrl = err.error.checkpoint_url;
 			client.updateChallenge({challengeUrl, choice: 1});
-		
 			client.updateChallenge({challengeUrl, securityCode: '301794'}); // <== securityCode - set code from email.
+			console.log("Please connect to your instagram account<https://instagram.com> on browser and give code validation you received by email");
 		}
 	}
 }
@@ -46,22 +46,24 @@ var index = async function (user, res, req) {
 		profile = await client.getUserByUsername({username: user});
 		res.status(200);
 		console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' '  + req.url + ': 200 Success');
-		milieuMessage += '<div id="profile_infos"><img id="profile_pic" alt="' + profile.username + '" src="' + profile.profile_pic_url + '"><div id="profile_name"><h2>@' + profile.username +  '</h2><h3>'+ profile.full_name + '</h3><p id="profile_biography">' + profile.biography.replace(/\n/g, "<br />") + '</p></div></div><br style="clear:both;" />';
+		milieuMessage += '<div id="profile_infos"><img id="profile_pic" alt="' + profile.username + '" src="' + profile.profile_pic_url + '"><a target="_blank" href="https://instagram.com/' + profile.username + '"><div id="profile_name"><h2>@' + profile.username +  '</h2></a><h3>'+ profile.full_name + '</h3><p id="profile_biography">' + profile.biography.replace(/\n/g, "<br />") + '</p></div></div><br style="clear:both;" />';
 		if(profile.is_private === true){
 			milieuMessage += 'private profile';
 		}
 			milieuMessage = await displayPicture(await client.getPhotosByUsername({username: user, first: 50, after:''}), milieuMessage);
 	}catch(err){
-		console.log('error 2');
+		
 		if(err.statusCode === 404){
 		milieuMessage += '<div class="centered">Unable to find User</div>';
 		res.status(404);
 		console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' ' + req.url + ': 404 Not Found');
-		}
-		if(err.error.message){
-			milieuMessage += 'Instagram display an error: ' + err.error.message;
-			res.status(500);
-			console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' ' + req.url + ': 500 Internal server error');
+		}else{
+			console.log('error 2');
+			if(err.error.message){
+				milieuMessage += '<div class="centered"><p>Instagram display an error:</p><strong>' + err.error.message + '</strong></div>';
+				res.status(500);
+				console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' ' + req.url + ': 500 Internal server error');
+			}
 		}
 	}finally{
 		res.send(message + milieuMessage + finMessage);
@@ -148,7 +150,7 @@ var postsInfo = async function(idPost, res, req){
 						if(media.edge_sidecar_to_children.edges[i].node.__typename === 'GraphImage'){
 							response[i] = {
 								'photo': media.edge_sidecar_to_children.edges[i].node.display_url,
-								'type': 'GraphImage'
+								'type': 'GraphImage',
 							};
 						}else{
 							//GraphVideo
@@ -157,14 +159,47 @@ var postsInfo = async function(idPost, res, req){
 								'type': 'GraphVideo'
 							};
 						}
+						response[i].tagged_people = {
+							'count': media.edge_sidecar_to_children.edges[i].node.edge_media_to_tagged_user.edges.length
+						}
+						for(e in media.edge_sidecar_to_children.edges[i].node.edge_media_to_tagged_user.edges){
+							let fullname;
+							if(media.edge_sidecar_to_children.edges[i].node.edge_media_to_tagged_user.edges[e].node.user.full_name === "" || media.edge_sidecar_to_children.edges[i].node.edge_media_to_tagged_user.edges[e].node.user.full_name === undefined){
+								fullname = media.edge_sidecar_to_children.edges[i].node.edge_media_to_tagged_user.edges[e].node.user.username;
+							}else{
+								fullname = media.edge_sidecar_to_children.edges[i].node.edge_media_to_tagged_user.edges[e].node.user.full_name;
+							}
+							response[i].tagged_people[e] = {
+								'username': media.edge_sidecar_to_children.edges[i].node.edge_media_to_tagged_user.edges[e].node.user.username,
+								'fullname': fullname,
+								'profile_pic': media.edge_sidecar_to_children.edges[i].node.edge_media_to_tagged_user.edges[e].node.user.profile_pic_url
+							};
+						}
 					}
 					response.count = i;
+				}
+			}
+			if(media.__typename !== 'GraphSidecar'){
+				response.tagged_people = {
+					'count': media.edge_media_to_tagged_user.edges.length
+				}
+				for(e in media.edge_media_to_tagged_user.edges){
+					let fullname;
+					if(media.edge_media_to_tagged_user.edges[e].node.user.full_name === "" || media.edge_media_to_tagged_user.edges[e].node.user.full_name === undefined){
+						fullname =  media.edge_media_to_tagged_user.edges[e].node.user.username;
+					}else{
+						fullname = media.edge_media_to_tagged_user.edges[e].node.user.full_name;
+					}
+					response.tagged_people[e] = {
+						'username': media.edge_media_to_tagged_user.edges[e].node.user.username,
+						'fullname': fullname,
+						'profile_pic': media.edge_media_to_tagged_user.edges[e].node.user.profile_pic_url
+					};
 				}
 			}
 			res.status(200).send(response);
 			console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' ' + req.url + ': 200 Success');
 	}catch(err){
-		console.log('error 3');
 		if(err.statusCode === 404){
 			res.status(404).send('<span style="color:white;">Post introuvable</span>');
 			console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' ' + req.url + ': 404 Not Found');
@@ -186,7 +221,6 @@ var morePost = async function(idLastPost, res, req, user = 'instagram'){
 			console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' ' + req.url + ': 200 Success');
 			res.send(response);
 	}catch(err){
-		console.log('error 4');
 		if(err.statusCode === 404){
 			res.status(404).send('Unable to find the page');
 			console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' ' + req.url + ': 404 Not Found');
@@ -214,7 +248,7 @@ var storyJson = async function(username, res, req){
 				'type': story[i].__typename,
 				'ressource':{
 				'image': story[i].display_resources[story[i].display_resources.length-1].src
-				}
+				},
 			};
 			if(story[i].__typename == "GraphStoryVideo"){
 				response[i].ressource.video = story[i].video_resources[story[i].video_resources.length-1].src;
@@ -229,7 +263,11 @@ var storyJson = async function(username, res, req){
 			response = {
 				error: 404
 			};
-			res.send(reponse);
+			res.send(response);
+		}else{
+			res.status(500).send('An error has occurred');
+			console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' ' + req.url + ': 500 Internal server error');
+			console.log(err);
 		}
 	}
 }

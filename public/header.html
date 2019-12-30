@@ -72,7 +72,6 @@
         }
 
         a {
-            text-decoration: none;
             color: black;
         }
 
@@ -89,10 +88,17 @@
         #ig-post-content video {
             max-height: 100%;
             width: auto;
+            position: relative;
+            top: 50%;
+            transform: translateY(-50%);
         }
 
-        .about {
+        .about #ig-post-content {
             overflow: auto;
+        }
+
+        .about #ig-post-text{
+            display:none;
         }
 
         #ig-post-arrow-right,
@@ -124,7 +130,7 @@
             height: 100%;
             width: 400px;
             padding: 10px;
-            overflow:auto;
+            overflow: auto;
             background-color: white;
             transform: translateX(350px);
             transition: .3s transform linear;
@@ -137,15 +143,18 @@
         .ig-post-text-owner {
             border-bottom: 1px solid #efefef;
             margin-bottom: 10px;
+            padding-bottom: 10px;
         }
 
-        .ig-post-text-owner img {
+        .ig-post-text-owner img, #tagged_people img {
             width: 50px;
             height: 50px;
             margin-right: 15px;
             border-radius: 50%;
             vertical-align: middle;
         }
+
+        
 
         #profile_infos {
             margin: 70px 0 0 50px;
@@ -174,6 +183,10 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
+        }
+
+        .centered strong {
+            color: red;
         }
 
         .material-icons.md-light {
@@ -230,9 +243,10 @@
 
         .ig-post-link a {
             color: white;
+            text-decoration:none;
         }
 
-        #lazyLoadDiv{
+        #lazyLoadDiv {
             background-color: transparent;
             margin: 20px;
             padding: 5px 9px;
@@ -307,7 +321,7 @@
                 href="#"><span style="margin-left:10px;"><i class="material-icons">exit_to_app</i>See on
                     Instagram</span></a></div>
         <div id="ig-post-content"><i class="material-icons rotation">cached</i></div>
-        <div id="ig-post-text"></div>
+        <div id="ig-post-text"><div class="centered"><i class="material-icons rotation">cached</i></div></div>
     </div>
     <div id="nav">
         <div class="ig-title">Pretty Instagram</div>

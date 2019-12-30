@@ -8,12 +8,14 @@ function loadStory(username){
             data: 'story=' + username,
             success: function(html, status){
                 story = JSON.parse(html);
-                if(story.count > 0){
-                    document.getElementById('profile_pic').classList.add('haveStory');
+                if(story.error == undefined){
+                    if(story.count > 0){
+                        document.getElementById('profile_pic').classList.add('haveStory');
+                    }
                 }
             },
             error:function(result, status, error){
-                document.getElementById('ig-post-content').innerHTML = 'An error has occurred: ' + status + ' ' + error;
+                console.log('An error has occurred while getting story: ' + status + ' ' + error);
             }
         });
 }
@@ -27,7 +29,7 @@ function changeStory(num){
 	    if(story[num].type === 'GraphStoryImage'){
 		    messageToSend += '<img src="' + story[num].ressource.image + '">';
 	    }else{
-		    messageToSend += '<video onended="changeStory(currentStory+1);return false;" poster="' + story[num].ressource.image + '" controls autoplay><source src="' + story[num].ressource.video + '" type="video/mp4"></video>';
+		    messageToSend += '<video onended="changeStory(currentStory+1);return false;" poster="' + story[num].ressource.image + '" autoplay><source src="' + story[num].ressource.video + '" type="video/mp4"></video>';
 	    }
 		if(num != story.count-1){ 
             messageToSend += '<div id="ig-post-arrow-right" onclick="changeStory(currentStory + 1);return false;" style=""><i class="material-icons md-light">keyboard_arrow_right</i></div>';

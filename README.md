@@ -2,7 +2,7 @@
 
 a simple node.js web page that display the latest posts of your Friends.
 
-If you have a suggestion to improve pretty-instagram, I invite you to open an issue post or/and fork and open a pull request.
+If you have a suggestion to improve pretty-instagram(new fonctionnality(ies), bugs or backends improvements), I invite you to open an issue post or/and fork and open a pull request.
 
 ![Screenshot](docs/screenshot.jpg)
 
@@ -10,30 +10,33 @@ Photo credit by [davidderueda](https://www.instagram.com/davidderueda/)
 
 ## Feature
 
-* Admire your friends' instagram posts without any disturbing interactions (likes, comments, etc.) to stay focused on the essential.
+* Admire your friends' instagram posts and story without any disturbing interactions (likes, comments, etc.) to stay focused on the essential.
 * **Lazy Loader** - all posts you don't see on your screen will never load on your device.
-* See posts in fullscreen.
 
-## Install
+### Installation
 
-Choose or create an empty folder before continue and select it on Terminal with `cd /path/folder_name`, then place .package-lock in the folder
+* Put `server.js`, `.env`, `package-lock.json` and `public/` in an empty folder folder.
+* Edit `.env` file, change YOUR_USERNAME by your instagram username and YOUR_PASSWORD by your instagram password
+* Install all dependencies (see ddependencies section below)
+* Start the server with: `node server.js`
+* See your server page in <http://your.domain.name:3000>
+
+I recommand you to use `screen` to execute the server in background:
+
+`screen -S screenName node server.js`
 
 ### Dependencies
 
-`npm i express dotenv serve-favicon body-parser instagram-web-api compression` to install all dependencies.
+* Nodejs 12.13 or newer (<https://nodejs.org>)
+* npm 6.12.1 or newer (<https://nomjs.com>)
+* git 2.20.1 or newer (<https://git-scm.com/>)
+
+ `npm i express dotenv serve-favicon body-parser instagram-web-api compression` to install node modules
 
 **The instagram-web-api dependencies on npm is outdated**, install it on npm to install his dependencies, then remove the instagram-web-api/ folder in node_modules/ and install the last version from github by using git:
 `git clone https://github.com/jlobos/instagram-web-api`
 
-### Installation
-
-* After you have installed all dependencies, put `server.js`, `.env` and `public/` in your folder.
-* Edit `.env` file:  YOUR_USERNAME by your instagram username and YOUR_PASSWORD by your instagram password
-* start the server with: `node server.js`
-
-I recommand you to use `screen` to be able to continue to use the server in background
-
-## LicencesS
+## Licence
 
 The repositories and all files insides, are available under the MIT licences
 
