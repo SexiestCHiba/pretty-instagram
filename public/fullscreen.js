@@ -101,6 +101,8 @@ var changePic = function(num){
 			for(i=0;i<obj[num].tagged_people.count;i++){
 				textMessage += '<a href="' + obj[num].tagged_people[i].username + '"><img src="' + obj[num].tagged_people[i].profile_pic + '" alt="' + obj[num].tagged_people[i].username + '">' + obj[num].tagged_people[i].fullname + '</a><br />'
 			}
+		}else{
+			textMessage += 'Noone has been tagged';
 		}
 
 		document.getElementById('ig-post-content').innerHTML = messageToSend;

@@ -41,16 +41,18 @@ var loginInsta = async function(){
 var index = async function (user, res, req) {
 	let profile;
 	let milieuMessage = '';
+	let userId;
 	try{
 		milieuMessage += '<script>var username = "'+ user + '";document.getElementById(\'input-search\').value="' + user + '";</script>';
 		profile = await client.getUserByUsername({username: user});
+		userId = profile.id;
 		res.status(200);
 		console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' '  + req.url + ': 200 Success');
 		milieuMessage += '<div id="profile_infos"><img id="profile_pic" alt="' + profile.username + '" src="' + profile.profile_pic_url + '"><a target="_blank" href="https://instagram.com/' + profile.username + '"><div id="profile_name"><h2>@' + profile.username +  '</h2></a><h3>'+ profile.full_name + '</h3><p id="profile_biography">' + profile.biography.replace(/\n/g, "<br />") + '</p></div></div><br style="clear:both;" />';
 		if(profile.is_private === true){
 			milieuMessage += 'private profile';
 		}
-			milieuMessage = await displayPicture(await client.getPhotosByUsername({username: user, first: 50, after:''}), milieuMessage);
+			milieuMessage = await displayPicture(await client.getUserIdPhotos({id: userId, first: 50, after:''}), milieuMessage);
 	}catch(err){
 		
 		if(err.statusCode === 404){
@@ -283,8 +285,7 @@ app.use(compression())
 	res.setHeader('Content-Type', 'text/html; charset=utf-8');
 	res.setHeader('Cache-Control', 'no-store, no-cache, public, no-transform');
 	res.setHeader('Keep-Alive', 'timeout=5, max=1000');
- 	let user = "instagram";
-	index(user, res, req);
+	index("instagram", res, req);
 	 
 })
 .post('/', function(req, res){
@@ -335,7 +336,7 @@ app.use(compression())
 	res.setHeader('Keep-Alive', 'timeout=5, max=1000');
 	res.status(200).send(story);
 })
-.use(function(req, res, next){
+.use(function(req, res){
 	res.status(404);
 	console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' ' + req.url + ': 404 Not Found');
 	res.setHeader('Content-Type', 'text/html; charset=utf-8');
