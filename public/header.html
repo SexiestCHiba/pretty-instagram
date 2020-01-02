@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 
 <head>
     <meta charset="utf-8" />
     <title>Pretty Instagram</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1">
+    <meta name="description" content="a simple nodejs web page that display the latest posts of your Friends" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <style>
         * {
@@ -26,7 +27,7 @@
             height: 100%;
         }
 
-        #nav {
+        nav {
             z-index: 100;
             position: fixed;
             top: 0;
@@ -39,14 +40,14 @@
             font-family: 'Courier New', Courier, monospace;
         }
 
-        #nav .ig-title {
+        nav .ig-title {
             position: absolute;
             margin-left: 20px;
             font-size: 20px;
             font-size: 1.5rem;
         }
 
-        #nav .ig-search {
+        nav .ig-search {
             position: absolute;
             left: 50%;
             transform: translateX(-50%);
@@ -54,7 +55,7 @@
             height: 48px;
         }
 
-        #nav #ig-setting {
+        nav #ig-setting {
             position: absolute;
             right: 0;
             margin-right: 20px;
@@ -185,7 +186,7 @@
             transform: translate(-50%, -50%);
         }
 
-        .centered strong {
+        .centered strong, #lazyLoadDiv strong {
             color: red;
         }
 
@@ -253,6 +254,7 @@
             border: 1px solid rgb(209, 209, 209);
             box-shadow: none;
             border-radius: 4px;
+            cursor: pointer;
         }
 
         .rotation {
@@ -268,6 +270,18 @@
 
         #last {
             display: none;
+        }
+
+        .warning{
+            background-color:red;
+            color:white;
+            text-align: center;
+            padding:5px;
+            display:block;
+            position:fixed;
+            width:100%;
+            top:48px;
+            z-index:101;
         }
 
         @media screen and (max-width: 768px) {
@@ -316,17 +330,24 @@
 
 <body>
     <div id="fullScreen" style="display:none;">
-        <div class="ig-post-link"><a href="javascript:closeFulllScreen();"><span><i
-                        class="material-icons">close</i>Close</span></a><a id="ig-link-to-post" target="_blank"
-                href="#"><span style="margin-left:10px;"><i class="material-icons">exit_to_app</i>See on
-                    Instagram</span></a></div>
+        <div class="ig-post-link">
+            <a href="javascript:closeFulllScreen();">
+                <span><i class="material-icons">close</i>Close</span>
+            </a>
+            <a id="ig-link-to-post" target="_blank" rel="noopener" href="#">
+                <span style="margin-left:10px;"><i class="material-icons">exit_to_app</i>See on Instagram</span>
+            </a>
+        </div>
         <div id="ig-post-content"><i class="material-icons rotation">cached</i></div>
         <div id="ig-post-text"><div class="centered"><i class="material-icons rotation">cached</i></div></div>
     </div>
-    <div id="nav">
+    <nav id="nav">
         <div class="ig-title">Pretty Instagram</div>
-        <div class="ig-search"><input id="input-search" type="text" placeholder="Search" value=""><i
-                class="material-icons" id="search-icon">keyboard_arrow_right</i></div>
+        <div class="ig-search">
+            <input id="input-search" type="text" placeholder="Search" value="">
+            <i class="material-icons" id="search-icon">keyboard_arrow_right</i>
+        </div>
         <div id="ig-setting"><i class="material-icons">more_vert</i></div>
-    </div>
+    </nav>
+    <noscript class="warning">Your browser don't support javascript, please update it or activate javascript in your browser settings, else the page won't work correctly</noscript>
     <main>

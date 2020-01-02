@@ -37,7 +37,7 @@ function loadMorePost(lastPostId){
 			lazyloadImages = document.querySelectorAll("img.lazy");
 		},
 		error: function(result, status, error){
-			lazyLoadDiv.innerHTML = 'An error has occurred while loading next posts ' + status + ' ' + error;
+			lazyLoadDiv.innerHTML = 'An error has occurred while loading next posts<br /><strong>' + status + ' ' + error + '</strong>';
             document.removeEventListener("scroll", lazyloadPosts);
             window.removeEventListener("resize", lazyloadPosts);
             window.removeEventListener("orientationChange", lazyloadPosts);

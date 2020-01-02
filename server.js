@@ -25,15 +25,15 @@ var loginInsta = async function(){
 		if(loginUser.status === 'ok'){
 			console.log('Connected');
 		}else{
-			console.log('Unable to connect to your Instagram account');
-			console.log(loginUser.status);
+			console.error('Unable to connect to your Instagram account');
+			console.error(loginUser.status);
 		}
 	}catch(err){
 		if(err.error && err.error.message === 'checkpoint_required'){
 			const challengeUrl = err.error.checkpoint_url;
 			client.updateChallenge({challengeUrl, choice: 1});
 			client.updateChallenge({challengeUrl, securityCode: '301794'}); // <== securityCode - set code from email.
-			console.log("Please connect to your instagram account<https://instagram.com> on browser and give code validation you received by email");
+			console.error("Please connect to your instagram account<https://instagram.com> on browser and give code validation you received by email");
 		}
 	}
 }
@@ -43,12 +43,12 @@ var index = async function (user, res, req) {
 	let milieuMessage = '';
 	let userId;
 	try{
-		milieuMessage += '<script>var username = "'+ user + '";document.getElementById(\'input-search\').value="' + user + '";</script>';
+		milieuMessage += '<script>var username = "'+ user + '";document.getElementById(\'input-search\').value="' + user + '"; document.title = "' + user + ' - Pretty Instagram";</script>';
 		profile = await client.getUserByUsername({username: user});
 		userId = profile.id;
 		res.status(200);
 		console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' '  + req.url + ': 200 Success');
-		milieuMessage += '<div id="profile_infos"><img id="profile_pic" alt="' + profile.username + '" src="' + profile.profile_pic_url + '"><a target="_blank" href="https://instagram.com/' + profile.username + '"><div id="profile_name"><h2>@' + profile.username +  '</h2></a><h3>'+ profile.full_name + '</h3><p id="profile_biography">' + profile.biography.replace(/\n/g, "<br />") + '</p></div></div><br style="clear:both;" />';
+		milieuMessage += '<div id="profile_infos"><img id="profile_pic" alt="' + profile.username + '" src="' + profile.profile_pic_url + '"><a target="_blank" rel="noopener" href="https://instagram.com/' + profile.username + '"><div id="profile_name"><h2>@' + profile.username +  '</h2></a><h3>'+ profile.full_name + '</h3><p id="profile_biography">' + profile.biography.replace(/\n/g, "<br />") + '</p></div></div><br style="clear:both;" />';
 		if(profile.is_private === true){
 			milieuMessage += 'private profile';
 		}
@@ -61,6 +61,7 @@ var index = async function (user, res, req) {
 		console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' ' + req.url + ': 404 Not Found');
 		}else{
 			console.log('error 2');
+			console.error(err);
 			if(err.error.message){
 				milieuMessage += '<div class="centered"><p>Instagram display an error:</p><strong>' + err.error.message + '</strong></div>';
 				res.status(500);
@@ -209,14 +210,13 @@ var postsInfo = async function(idPost, res, req){
 		}else{
 			res.status(500).send('An error has occurred');
 			console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' ' + req.url + ': 500 Internal Serveur Error');
-			console.log(err);
+			console.err(err);
 		}
 	}
 	
 }
 
 var morePost = async function(idLastPost, res, req, user = 'instagram'){
-	let photo;
 	try{
 			response = await displayPicture(await client.getPhotosByUsername({username: user, first: 50, after: idLastPost}), '', false);
 			res.status(200);
@@ -233,7 +233,7 @@ var morePost = async function(idLastPost, res, req, user = 'instagram'){
 			}else{
 				res.status(500).send('An error has occurred');
 				console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' ' + req.url + ': 500 Internal server error');
-				console.log(err);
+				console.error(err);
 			}
 		}
 	}
@@ -269,7 +269,7 @@ var storyJson = async function(username, res, req){
 		}else{
 			res.status(500).send('An error has occurred');
 			console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' ' + req.url + ': 500 Internal server error');
-			console.log(err);
+			console.error(err);
 		}
 	}
 }
@@ -283,14 +283,14 @@ app.use(compression())
 .use(favicon(__dirname + '/public/logo.png'))
 .get('/', function(req, res){
 	res.setHeader('Content-Type', 'text/html; charset=utf-8');
-	res.setHeader('Cache-Control', 'no-store, no-cache, public, no-transform');
+	res.setHeader('Cache-Control', 'no-store, no-cache, public');
 	res.setHeader('Keep-Alive', 'timeout=5, max=1000');
 	index("instagram", res, req);
 	 
 })
 .post('/', function(req, res){
 	res.setHeader('Content-Type', 'text/html; charset=utf-8');
-	res.setHeader('Cache-Control', 'no-store, no-cache, public, no-transform');
+	res.setHeader('Cache-Control', 'no-store, no-cache, public');
 	res.setHeader('Keep-Alive', 'timeout=5, max=1000');
 	if(req.body.idPost !== undefined){
 		postsInfo(req.body.idPost, res, req);
