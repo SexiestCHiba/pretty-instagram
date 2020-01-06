@@ -1,23 +1,5 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="utf-8" />
-    <title>Error 404 - Pretty Instagram</title>
-    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1">
-</head>
+
 <style>
-    html {
-        background-color: #fafafa;
-    }
-
-    main {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        text-align: center;
-    }
-
     #title {
         font-family: 'Courier New', Courier, monospace;
         font-size: 20px;
@@ -33,20 +15,18 @@
         border-radius: 4px;
     }
 </style>
-<body>
-    <main>
-        <p id="title">Pretty-Instagram</p>
-        <p>Erro 404 - The page your search can't be found</p>
-        <button id="HistoryBack">Back</button>
-        <button id="home">Home</button>
+        <div class="centered">
+            <p id="title">Pretty-Instagram</p>
+            <p>Error 404 - The page your search can't be found</p>
+            <button id="HistoryBack">Back</button>
+            <button id="home">Home</button>
+        </div>
     </main>
     <script>
-    document.getElementById('HistoryBack').addEventListener("click", function(){
-        window.history.back();
-    });
-    document.getElementById("home").addEventListener("click", function(){
-        window.location.assign('/');
-    });
+        document.getElementById('HistoryBack').addEventListener("click", function () {
+            window.history.back();
+        });
+        document.getElementById("home").addEventListener("click", function () {
+            window.location.assign('/');
+        });
     </script>
-</body>
-</html>

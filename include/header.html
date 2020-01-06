@@ -15,16 +15,17 @@
 
         html {
             background-color: #fafafa;
-            font-family: Verdana, Geneva, Tahoma, sans-serif;
         }
 
         body {
             margin: 0;
+            margin-bottom: 20px;
             border: 0;
             padding: 0;
             font-size: 16px;
             font-size: 1rem;
             height: 100%;
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
         }
 
         nav {
@@ -70,6 +71,15 @@
 
         main {
             margin: 50px 0px;
+        }
+
+        #login{
+            background-color: inherit;
+            border: 1px solid black;
+        }
+
+        #login input{
+            width:100%;
         }
 
         a {
@@ -155,8 +165,6 @@
             vertical-align: middle;
         }
 
-        
-
         #profile_infos {
             margin: 70px 0 0 50px;
         }
@@ -181,6 +189,7 @@
 
         .centered {
             position: absolute;
+            text-align:center;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
@@ -350,4 +359,4 @@
         <div id="ig-setting"><i class="material-icons">more_vert</i></div>
     </nav>
     <noscript class="warning">Your browser don't support javascript, please update it or activate javascript in your browser settings, else the page won't work correctly</noscript>
-    <main>
+    <main id="main">

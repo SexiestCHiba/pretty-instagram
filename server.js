@@ -13,9 +13,6 @@ const username = process.env.USERNAME;
 const password = process.env.PASSWORD;
 const message = env.message;
 const finMessage = env.finMessage;
-const fullscreen = env.fullscreen;
-const loadPosts = env.loadPosts;
-const story = env.story;
 const error404 = env.error404;
 
 var loginInsta = async function(){
@@ -52,7 +49,8 @@ var index = async function (user, res, req) {
 		if(profile.is_private === true){
 			milieuMessage += 'private profile';
 		}
-			milieuMessage = await displayPicture(await client.getUserIdPhotos({id: userId, first: 50, after:''}), milieuMessage);
+		milieuMessage += '<script src="/public/story.js"></script>';
+		milieuMessage = await displayPicture(await client.getUserIdPhotos({id: userId, first: 50, after:''}), milieuMessage);
 	}catch(err){
 		
 		if(err.statusCode === 404){
@@ -69,7 +67,8 @@ var index = async function (user, res, req) {
 			}
 		}
 	}finally{
-		res.send(message + milieuMessage + finMessage);
+		res.write(milieuMessage + finMessage);
+		res.end();
 	}
 }
 
@@ -277,16 +276,34 @@ var storyJson = async function(username, res, req){
 loginInsta();
 
 app.use(compression())
-.use(express.static(__dirname + '/public'))
+.use('/public', express.static(__dirname + '/public'))
 .use(bodyParser.json())
 .use(bodyParser.urlencoded({ extended: true}))
 .use(favicon(__dirname + '/public/logo.png'))
+.get('/robots.txt', function(req, res){
+	res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+	res.setHeader('Cache-Control', 'public');
+	res.setHeader('Keep-Alive', 'timeout=5, max=1000');
+	res.status(200).send('User-agent: *\n'+
+	'Allow: *\n'+
+	'Disallow: /public/\n');
+	console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' ' + req.url + ': 200 Success');
+
+})
 .get('/', function(req, res){
 	res.setHeader('Content-Type', 'text/html; charset=utf-8');
 	res.setHeader('Cache-Control', 'no-store, no-cache, public');
 	res.setHeader('Keep-Alive', 'timeout=5, max=1000');
+	res.write(message);
 	index("instagram", res, req);
 	 
+})
+.get('/:nick', function(req, res){
+	res.setHeader('Content-Type', 'text/html; charset=utf-8');
+	res.setHeader('Cache-Control', 'no-store, no-cache, public');
+	res.setHeader('Keep-Alive', 'timeout=5, max=1000');
+	res.write(message);
+	index(req.params.nick, res, req);
 })
 .post('/', function(req, res){
 	res.setHeader('Content-Type', 'text/html; charset=utf-8');
@@ -306,43 +323,19 @@ app.use(compression())
 		}
 	}
 })
-.get('/:nick', function(req, res){
-	res.setHeader('Content-Type', 'text/html; charset=utf-8');
-	res.setHeader('Cache-Control', 'no-store, no-cache, public');
-	res.setHeader('Keep-Alive', 'timeout=5, max=1000');
-	index(req.params.nick, res, req);
-})
 .post('/:nick', function(req, res){
 	res.setHeader('Content-Type', 'text/html; charset=utf-8');
 	res.setHeader('Cache-Control', 'no-store, no-cache, public');
 	res.setHeader('Keep-Alive', 'timeout=5, max=1000');
 	morePost(req.body.lastPostId, res, req, req.params.nick);
 })
-.get('/public/fullscreen.js', function(req,res){
-	res.setHeader('Content-Type', 'text/javascript; charset=utf-8');
-	res.setHeader('Cache-Control', 'public');
-	res.setHeader('Keep-Alive', 'timeout=5, max=1000');
-	res.status(200).send(fullscreen);
-})
-.get('/public/loadPosts.js', function(req,res){
-	res.setHeader('Content-Type', 'text/javascript; charset=utf-8');
-	res.setHeader('Cache-Control', 'public');
-	res.setHeader('Keep-Alive', 'timeout=5, max=1000');
-	res.status(200).send(loadPosts);
-})
-.get('/public/story.js', function(req,res){
-	res.setHeader('Content-Type', 'text/javascript; charset=utf-8');
-	res.setHeader('Cache-Control', 'public');
-	res.setHeader('Keep-Alive', 'timeout=5, max=1000');
-	res.status(200).send(story);
-})
 .use(function(req, res){
 	res.status(404);
 	console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' ' + req.url + ': 404 Not Found');
 	res.setHeader('Content-Type', 'text/html; charset=utf-8');
-	res.setHeader('Cache-Control', 'no-cache, public, no-transform');
+	res.setHeader('Cache-Control', 'public');
 	res.setHeader('Keep-Alive', 'timeout=5, max=1000');
-	res.send(error404);
+	res.send(message + error404);
 });
 
 app.listen(3000);
