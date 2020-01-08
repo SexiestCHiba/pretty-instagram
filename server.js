@@ -5,25 +5,24 @@ require("dotenv").config();
 var app = express();
 var bodyParser = require('body-parser');
 const Instagram = require('instagram-web-api');
-const env = require("./env");
 var client;
 var loginUser;
 
 const username = process.env.USERNAME;
 const password = process.env.PASSWORD;
-const message = env.message;
-const finMessage = env.finMessage;
-const error404 = env.error404;
+let message;
+let finMessage;
+let error404;
 
 var loginInsta = async function(){
 	client = new Instagram({username, password});
 	try{
 		loginUser = await client.login();
 		if(loginUser.status === 'ok'){
-			console.log('Connected');
+			return 'Connected';
 		}else{
-			console.error('Unable to connect to your Instagram account');
 			console.error(loginUser.status);
+			return 'Unable to connect to your Instagram account';
 		}
 	}catch(err){
 		if(err.error && err.error.message === 'checkpoint_required'){
@@ -273,69 +272,95 @@ var storyJson = async function(username, res, req){
 	}
 }
 
-loginInsta();
-
-app.use(compression())
-.use('/public', express.static(__dirname + '/public'))
-.use(bodyParser.json())
-.use(bodyParser.urlencoded({ extended: true}))
-.use(favicon(__dirname + '/public/logo.png'))
-.get('/robots.txt', function(req, res){
-	res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-	res.setHeader('Cache-Control', 'public');
-	res.setHeader('Keep-Alive', 'timeout=5, max=1000');
-	res.status(200).send('User-agent: *\n'+
-	'Allow: *\n'+
-	'Disallow: /public/\n');
-	console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' ' + req.url + ': 200 Success');
-
-})
-.get('/', function(req, res){
-	res.setHeader('Content-Type', 'text/html; charset=utf-8');
-	res.setHeader('Cache-Control', 'no-store, no-cache, public');
-	res.setHeader('Keep-Alive', 'timeout=5, max=1000');
-	res.write(message);
-	index("instagram", res, req);
-	 
-})
-.get('/:nick', function(req, res){
-	res.setHeader('Content-Type', 'text/html; charset=utf-8');
-	res.setHeader('Cache-Control', 'no-store, no-cache, public');
-	res.setHeader('Keep-Alive', 'timeout=5, max=1000');
-	res.write(message);
-	index(req.params.nick, res, req);
-})
-.post('/', function(req, res){
-	res.setHeader('Content-Type', 'text/html; charset=utf-8');
-	res.setHeader('Cache-Control', 'no-store, no-cache, public');
-	res.setHeader('Keep-Alive', 'timeout=5, max=1000');
-	if(req.body.idPost !== undefined){
-		postsInfo(req.body.idPost, res, req);
-	}else{
-		if(req.body.story !== undefined){
-			storyJson(req.body.story, res, req);
-		}else{
-			if(req.body.lastPostId !== undefined){
-				morePost(req.body.lastPostId, res, req);
-			}else{
-				res.status(400).send("Bad request");
-			}
-		}
-	}
-})
-.post('/:nick', function(req, res){
-	res.setHeader('Content-Type', 'text/html; charset=utf-8');
-	res.setHeader('Cache-Control', 'no-store, no-cache, public');
-	res.setHeader('Keep-Alive', 'timeout=5, max=1000');
-	morePost(req.body.lastPostId, res, req, req.params.nick);
-})
-.use(function(req, res){
-	res.status(404);
-	console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' ' + req.url + ': 404 Not Found');
-	res.setHeader('Content-Type', 'text/html; charset=utf-8');
-	res.setHeader('Cache-Control', 'public');
-	res.setHeader('Keep-Alive', 'timeout=5, max=1000');
-	res.send(message + error404);
+const promise1 = new Promise((resolve, reject)=> {
+	resolve(loginInsta());
 });
 
-app.listen(3000);
+const promise2 = new Promise((resolve, reject) => {
+	try{
+		const env = require("./env");
+		message = env.message;
+		finMessage = env.finMessage;
+		error404 = env.error404;
+		resolve("All needed files loaded");
+	}catch(err){
+		reject(err)
+	}
+});
+
+Promise.all([promise1, promise2]).then((values) => {
+	console.log(values);
+	routing();
+}).catch((reasons) => {
+	console.error("ERROR");
+	console.warn(reasons);
+});
+
+
+let  routing = function(){
+	app.use(compression())
+	.use('/public', express.static(__dirname + '/public'))
+	.use(bodyParser.json())
+	.use(bodyParser.urlencoded({ extended: true}))
+	.use(favicon(__dirname + '/public/logo.png'))
+	.get('/robots.txt', (req, res) => {
+		res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+		res.setHeader('Cache-Control', 'public');
+		res.setHeader('Keep-Alive', 'timeout=5, max=1000');
+		res.status(200).send('User-agent: *\n'+
+		'Allow: *\n'+
+		'Disallow: /public/\n');
+		console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' ' + req.url + ': 200 Success');
+	
+	})
+	.get('/', (req, res) => {
+		res.setHeader('Content-Type', 'text/html; charset=utf-8');
+		res.setHeader('Cache-Control', 'no-store, no-cache, public');
+		res.setHeader('Keep-Alive', 'timeout=5, max=1000');
+		res.write(message);
+		index("instagram", res, req);
+		 
+	})
+	.get('/:nick', (req, res) => {
+		res.setHeader('Content-Type', 'text/html; charset=utf-8');
+		res.setHeader('Cache-Control', 'no-store, no-cache, public');
+		res.setHeader('Keep-Alive', 'timeout=5, max=1000');
+		res.write(message);
+		index(req.params.nick, res, req);
+	})
+	.post('/', (req, res) => {
+		res.setHeader('Content-Type', 'text/html; charset=utf-8');
+		res.setHeader('Cache-Control', 'no-store, no-cache, public');
+		res.setHeader('Keep-Alive', 'timeout=5, max=1000');
+		if(req.body.idPost !== undefined){
+			postsInfo(req.body.idPost, res, req);
+		}else{
+			if(req.body.story !== undefined){
+				storyJson(req.body.story, res, req);
+			}else{
+				if(req.body.lastPostId !== undefined){
+					morePost(req.body.lastPostId, res, req);
+				}else{
+					res.status(400).send("Bad request");
+				}
+			}
+		}
+	})
+	.post('/:nick', (req, res) => {
+		res.setHeader('Content-Type', 'text/html; charset=utf-8');
+		res.setHeader('Cache-Control', 'no-store, no-cache, public');
+		res.setHeader('Keep-Alive', 'timeout=5, max=1000');
+		morePost(req.body.lastPostId, res, req, req.params.nick);
+	})
+	.use((req, res) => {
+		res.status(404);
+		console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' ' + req.url + ': 404 Not Found');
+		res.setHeader('Content-Type', 'text/html; charset=utf-8');
+		res.setHeader('Cache-Control', 'public');
+		res.setHeader('Keep-Alive', 'timeout=5, max=1000');
+		res.send(message + error404);
+	});
+	
+	app.listen(3000);
+	
+}

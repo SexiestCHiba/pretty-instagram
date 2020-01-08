@@ -20,6 +20,15 @@ function loadStory(username){
         });
 }
 
+function playPauseMedia() {
+    media = document.getElementById("Story");
+    if(media.paused) {
+      media.play();
+    } else {
+      media.pause();
+    }
+  }
+
 function changeStory(num){
     if(num < story.count){
 	    let messageToSend = '';
@@ -29,10 +38,12 @@ function changeStory(num){
 	    if(story[num].type === 'GraphStoryImage'){
 		    messageToSend += '<img src="' + story[num].ressource.image + '">';
 	    }else{
-		    messageToSend += '<video onended="changeStory(currentStory+1);return false;" poster="' + story[num].ressource.image + '" autoplay><source src="' + story[num].ressource.video + '" type="video/mp4"></video>';
+		    messageToSend += '<video id="Story" onclick="playPauseMedia();return false;" onended="changeStory(currentStory+1);return false;" poster="' + story[num].ressource.image + '" autoplay><source src="' + story[num].ressource.video + '" type="video/mp4"></video>';
 	    }
 		if(num != story.count-1){ 
             messageToSend += '<div id="ig-post-arrow-right" onclick="changeStory(currentStory + 1);return false;" style=""><i class="material-icons md-light">keyboard_arrow_right</i></div>';
+        }else{
+            messageToSend += '<div id="ig-post-arrow-right" onclick="changeStory(currentStory + 1);return false;" style=""><i class="material-icons md-light">close</i></div>';
         }
         document.getElementById('ig-post-content').innerHTML = messageToSend;
 		currentStory = num;
@@ -52,10 +63,13 @@ function displayStory(){
             document.getElementById('ig-post-content').innerHTML = '<img src="' + story[0].ressource.image + '">';
         }else{
             //video
-            document.getElementById('ig-post-content').innerHTML = '<video id="Story" onended="changeStory(currentStory+1);return false;" poster="'+ story[0].ressource.image + '" autoplay><source src="'+ story[0].ressource.video +'" type="video/mp4"></video>';
+            document.getElementById('ig-post-content').innerHTML = '<video id="Story" onclick="playPauseMedia();return false;" onended="changeStory(currentStory+1);return false;" poster="'+ story[0].ressource.image + '" autoplay><source src="'+ story[0].ressource.video +'" type="video/mp4"></video>';
         }
         if(story.count > 1){
             document.getElementById('ig-post-content').innerHTML += '<div id="ig-story-arrow-right" onclick="changeStory(currentStory + 1)"><i class="material-icons md-light">keyboard_arrow_right</i></div>';
+        }else{
+            document.getElementById('ig-post-content').innerHTML += '<div id="ig-post-arrow-right" onclick="changeStory(currentStory + 1);return false;" style=""><i class="material-icons md-light">close</i></div>';
+
         }
         document.getElementById('ig-post-content').classList.add('story');
         removeTextSection();
