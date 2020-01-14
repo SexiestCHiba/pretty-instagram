@@ -122,6 +122,7 @@
             transform: translateY(-50%);
             max-width: 100%;
             height: auto;
+            z-index:100;
         }
 
         #ig-post-arrow-right,
@@ -275,6 +276,8 @@
 
         #search-icon {
             cursor: pointer;
+            background: transparent;
+            border-width: 0;
         }
 
         #last {
@@ -303,21 +306,30 @@
             }
 
             #ig-post-content {
-                height: 50%;
+                height: 90vw;
             }
 
             #ig-post-arrow-right,
             #ig-story-arrow-right {
-                right: 20px;
+                right: 5px;
             }
 
             #ig-post-arrow-left,
             #ig-story-arrow-left {
-                left: 20px;
+                left: 5px;
             }
 
             #ig-post-text {
                 display: none;
+            }
+        }
+
+        @media screen and (max-width: 768px) and (orientation: landscape) {
+            .photo {
+                grid-template-columns: 1fr 1fr;
+            }
+            #ig-post-content {
+                height: 90vh;
             }
         }
 
@@ -353,8 +365,8 @@
     <nav id="nav">
         <div class="ig-title">Pretty Instagram</div>
         <div class="ig-search">
-            <input id="input-search" type="text" placeholder="Search" value="">
-            <i class="material-icons" id="search-icon">keyboard_arrow_right</i>
+            <form id="formSearch"><input id="input-search" type="search" placeholder="Search" value="">
+            <button class="material-icons" type="submit" id="search-icon">keyboard_arrow_right</button></form>
         </div>
         <div id="ig-setting"><i class="material-icons">more_vert</i></div>
     </nav>
