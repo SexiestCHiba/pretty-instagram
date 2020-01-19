@@ -44,10 +44,11 @@ var index = async function (user, res, req) {
 		userId = profile.id;
 		res.status(200);
 		console.log('New request[' + req.connection.remoteAddress + ']: ' + req.method +  ' '  + req.url + ': 200 Success');
-		milieuMessage += '<div id="profile_infos"><img id="profile_pic" alt="' + profile.username + '" src="' + profile.profile_pic_url + '"><a target="_blank" rel="noopener" href="https://instagram.com/' + profile.username + '"><div id="profile_name"><h2>@' + profile.username +  '</h2></a><h3>'+ profile.full_name + '</h3><p id="profile_biography">' + profile.biography.replace(/\n/g, "<br />") + '</p></div></div><br style="clear:both;" />';
+		milieuMessage += '<div id="profile_infos"><img id="profile_pic" alt="' + profile.username + '" src="' + profile.profile_pic_url + '"><a target="_blank" rel="noopener" href="https://instagram.com/' + profile.username + '"><div id="profile_name"><h2>@' + profile.username +  '</h2></a><h3>'+ profile.full_name + '</h3>';
 		if(profile.is_private === true){
 			milieuMessage += 'private profile';
 		}
+		milieuMessage+='<p id="profile_biography">' + profile.biography.replace(/\n/g, "<br />") + '</p></div></div><br style="clear:both;" />';
 		milieuMessage += '<script src="/public/story.js"></script>';
 		milieuMessage = await displayPicture(await client.getUserIdPhotos({id: userId, first: 50, after:''}), milieuMessage);
 	}catch(err){
@@ -79,7 +80,7 @@ var displayPicture = function(photo, milieuMessage, firstLoad = true){
 	if(max === 0 || photo.user.edge_owner_to_timeline_media.edges[0] === undefined) {
 		milieuMessage += 'No posts to display';
 	}else{
-		for(x = 0; x < max; x++){
+		for(x in photo.user.edge_owner_to_timeline_media.edges){
 			milieuMessage += '<div class="ig-post">';
 			if(photo.user.edge_owner_to_timeline_media.edges[x].node.__typename == 'GraphSidecar'){
 				milieuMessage += '<div class="graphIcon"><i class="material-icons md-light">filter_none</i></div>';

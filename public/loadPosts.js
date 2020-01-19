@@ -33,11 +33,16 @@ function loadMorePost(lastPostId){
 		data: 'lastPostId=' + lastPostId,
 		success: function(html, status){
 			document.getElementById('posts').innerHTML = document.getElementById('posts').innerHTML + html;
-			document.getElementById('lazyLoadDiv').innerHTML = 'click here to load more posts';
+			let elements = document.querySelectorAll("#last");
+			if(elements[elements.length-1].innerHTML !== "null"){
+				document.getElementById('lazyLoadDiv').innerHTML = 'click here to load more posts';
+			}else{
+				document.getElementById('lazyLoadDiv').style.display = "none";
+			}
 			lazyloadImages = document.querySelectorAll("img.lazy");
 		},
 		error: function(result, status, error){
-			lazyLoadDiv.innerHTML = 'An error has occurred while loading next posts<br /><strong>' + status + ' ' + error + '</strong>';
+			lazyLoadDiv.innerHTML = 'An error has occurred while loading next posts<br /><strong>' + status + ' ' + error + '<br />' + result.responseText + '</strong>';
             document.removeEventListener("scroll", lazyloadPosts);
             window.removeEventListener("resize", lazyloadPosts);
             window.removeEventListener("orientationChange", lazyloadPosts);

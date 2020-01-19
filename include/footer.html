@@ -1,5 +1,17 @@
 <script src="/public/fullscreen.js"></script>
 <script src="/public/loadPosts.js"></script>
+<script>
+    function isScrolled(){
+        if(window.pageYOffset > 230){
+            document.body.classList.add('scrolled');
+        }else{
+            document.body.classList.remove('scrolled');
+        }
+    }
+    document.addEventListener("scroll", isScrolled);
+    window.addEventListener("resize", isScrolled);
+    window.addEventListener("orientationChange", isScrolled);
+</script>
 </main>
 <footer style="text-align:center;">
     <a href="https://github.com/sexiestchiba/pretty-instagram" target="_blank" rel="noopener">GitHub</a>&nbsp;&bull;&nbsp;<a href="javascript:displayAbout();" rel="noopener">About</a>
