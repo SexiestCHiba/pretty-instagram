@@ -29,7 +29,11 @@ var loginInsta = async function(){
 			const challengeUrl = err.error.checkpoint_url;
 			client.updateChallenge({challengeUrl, choice: 1});
 			client.updateChallenge({challengeUrl, securityCode: '301794'}); // <== securityCode - set code from email.
-			console.error("Please connect to your instagram account<https://instagram.com> on browser and give code validation you received by email");
+			console.error("Please follow this URL ( https://instagram.com/ " + err.error.checkpoint_url + ") on browser and give code validation you received by email, then restart the server");
+			return 'Chalenge required';
+		}else{
+			// console.error(err);
+			// return 'An error occured';
 		}
 	}
 }
