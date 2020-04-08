@@ -302,9 +302,14 @@ a {
 }
 
 @media screen and (max-width: 768px) {
-    #profile_pic{
-        
+    #profile_infos{
+        margin: 70px 0 0 0px;
+        width: 100vw;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
+
     .photo {
         grid-template-columns: 1fr;
     }
