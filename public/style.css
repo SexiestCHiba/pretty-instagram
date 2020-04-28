@@ -303,7 +303,7 @@ a {
 
 @media screen and (max-width: 768px) {
     #profile_infos{
-        margin: 70px 0 0 0;
+        margin: 70px 0 0;
         width: 100vw;
         display: flex;
         flex-direction: column;
