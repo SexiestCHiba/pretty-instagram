@@ -8,7 +8,7 @@ var showPost = function(id){
 		type: 'POST',
 		dataType: 'html',
 		data:'idPost=' + id,
-		success: function(html, status){
+		success: function(html){
 			obj = JSON.parse(html);
 			document.getElementById('ig-post-content').classList.remove('story');
 			document.getElementById('ig-post-content').setAttribute('style', '');

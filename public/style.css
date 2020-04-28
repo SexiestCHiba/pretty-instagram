@@ -26,14 +26,14 @@ nav {
     height: 48px;
     line-height: 48px;
     background-color: inherit;
-    box-shadow: 0px 2px 1px transparent;
+    box-shadow: 0 2px 1px transparent;
     font-family: 'Courier New', Courier, monospace;
     transition: background-color .3s ease, box-shadow .3s ease;
 }
 
 .scrolled nav{
     background-color:white;
-    box-shadow: 0px 2px 1px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 1px rgba(0, 0, 0, 0.1);
 }
 
 nav #ig-title {
@@ -73,7 +73,7 @@ nav #ig-setting {
 }
 
 main {
-    margin: 50px 0px;
+    margin: 50px 0;
 }
 
 #login {
@@ -250,8 +250,8 @@ a {
 
 .ig-post-link {
     position: absolute;
-    top: 0px;
-    left: 0px;
+    top: 0;
+    left: 0;
     z-index: 201;
     margin-top: 10px;
     font-size: 1.2rem;
@@ -303,7 +303,7 @@ a {
 
 @media screen and (max-width: 768px) {
     #profile_infos{
-        margin: 70px 0 0 0px;
+        margin: 70px 0 0 0;
         width: 100vw;
         display: flex;
         flex-direction: column;

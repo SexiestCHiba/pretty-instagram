@@ -31,7 +31,7 @@ function loadMorePost(lastPostId){
 		type: 'POST',
 		dataType: 'html',
 		data: 'lastPostId=' + lastPostId,
-		success: function(html, status){
+		success: function(html){
 			document.getElementById('posts').innerHTML = document.getElementById('posts').innerHTML + html;
 			let elements = document.querySelectorAll("#last");
 			if(elements[elements.length-1].innerHTML !== "null"){
@@ -48,7 +48,7 @@ function loadMorePost(lastPostId){
             window.removeEventListener("orientationChange", lazyloadPosts);
 		}
 	});
-};
+}
 	var lazyloadDiv = document.getElementById('lazyLoadDiv');
 	function lazyloadPosts(){
 	    document.getElementById('lazyLoadDiv').innerHTML = '<i class="material-icons rotation">cached</i>';

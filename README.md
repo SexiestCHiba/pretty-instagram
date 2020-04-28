@@ -1,4 +1,4 @@
-# pretty-instagram
+# pretty-instagram [![CodeFactor](https://www.codefactor.io/repository/github/sexiestchiba/pretty-instagram/badge)](https://www.codefactor.io/repository/github/sexiestchiba/pretty-instagram)
 
 a simple node.js web page that display the latest posts of your Friends.
 
